@@ -1,0 +1,153 @@
+% \iffalse
+%% File: frunge-lettrine.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
+%<*driver>
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+\input docstrip.tex
+\askforoverwritefalse
+\preamble
+
+EXPERIMENTAL CODE
+
+Do not distribute this file without also distributing the
+source files specified above.
+
+Do not distribute a modified version of this file under the same name.
+
+\endpreamble
+\postamble
+\endpostamble
+\keepsilent
+\generate{\file{frunge-lettrine.sty}{\from{frunge-lettrine.dtx}{package}}}
+
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+\ProvidesFile{frunge-lettrine.sty}
+  [24.11.2009 v0.a using lettrine to produce beautiful frunge based documents]
+\documentclass{gmdocc}
+\usepackage{
+  hyperref,
+  polyglossia
+}
+\hypersetup{
+  pdfborder= 0 0 0,
+  colorlinks=true,
+  linkcolor=deepblue,
+  filecolor=blue
+}
+\setmainlanguage{english}
+\setmainfont{TeX Gyre Pagella}
+
+\title{|frunge-lettrine|}
+\author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
+\def\marginpartt{\scriptsize\ttfamily}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+This is the documentation of the package |frunge-lettrine|. It aims to offer a simple way to use beautiful lettrine at the beginning of every paragraph. Also, a thin line is planned to be set on the base of every line to simulate the handwritings of old times. (Not yet implemented.)
+
+Based on the frunge project, it will take some time to be really usefull. If you want to contribute to frunge, just google it and mail to the projet mailing list ;)
+\end{abstract}
+\tableofcontents
+\section{Usage}
+There is not much to say about using the package: just load it with
+\begin{verbatim}
+\usepackage[options]{frunge-lettrine}
+\end{verbatim}
+where \verb|option| are:
+
+\subsection{Package Options}
+No options implemented so far. Aims are:
+\begin{description}
+\item choose the font the lettrines are taken from
+\item choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
+\item disable “lettrination“ – just use the thin line under the letters
+\item enable the thin line under letters
+\item[maincolor] sets the main color of the lettrines (mostly black)
+\item[ornamentcolor] color used for the ornaments (maybe red?)
+\item ?
+\end{description}
+
+\subsection{}
+
+\section{Thanks}
+This package would be useless without the wonderfull lettrine package by Daniel Flipo. And it would have never been born without the help of Paul Isambert, who actually wrote all the important code. Thanks a lot!
+
+\section{Implementation}
+\DocInput{frunge-lettrine.dtx}
+\end{document}
+%</driver>
+%
+%<*package>
+% \fi
+% This would be a good place to load package options. Just in case we need some, we write some placeholders here:
+% \begin{macrocode}
+\newif\iffrlet@disable
+\frlet@disablefalse
+\newif\iffrlet@thinline
+\frlet@thinlinefalse
+
+\def\frlet@colori{black}
+\def\frlet@colorii{red}
+
+\RequirePackage{xkeyval}
+\DeclareOptionX{random}{\def\frlet@random{#1}}
+\DeclareOptionX{font}{\def\frlet@font{#1}}
+\DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
+\DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
+\DeclareOptionX{disable}{\frlet@disabletrue}
+\DeclareOptionX{thinline}{\frlet@thinlinetrue}
+\ProcessOptionsX
+
+% \end{macrocode}
+% If disable is given, the package will stop doing anything. The thin line that is planned would be coded right here before the |\if|.
+% \begin{macrocode}
+\iffrlet@disable%
+  \endinput%
+  \else%
+\fi%
+
+% \end{macrocode}
+% Once again: These options don’t do anything yet!
+% 
+% Load the needed packages:
+% \begin{macrocode}
+\RequirePackage{
+  lettrine
+}
+% \end{macrocode}
+%\begin{macro} We want to modify |\lettrine| a bit, so we define 
+% \begin{macrocode}
+\def\frlet@capital#1#2{
+  \lettrine{\color{\frlet@colori}#1}{\color{\frlet@colorii}#2}%
+  \llap{\lettrine{\color{\frlet@colori}#2}{\color{\frlet@colorii}#1}}%
+}
+% \end{macrocode}
+% \end{macro}
+
+% \begin{macrocode}
+\AtBeginDocument{
+  \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}
+  \everypar={\neweverypar\frlet@capital} 
+
+  \let\@Startsection\@startsection
+  \def\@startsection{%
+  \everypar{}%
+  \@Startsection}
+  \let\@Xsect\@xsect
+  \def\@xsect#1{%
+  \@Xsect{#1}%
+  \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
+  \ignorespaces}
+  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}
+  \everypar={\neweverypar\frlet@capital}
+}
+% \end{macrocode}
+% \Finale
+% \endinput

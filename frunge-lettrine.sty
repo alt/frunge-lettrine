@@ -1,0 +1,65 @@
+%%
+%% This is file `frunge-lettrine.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% frunge-lettrine.dtx  (with options: `package')
+%% 
+%% EXPERIMENTAL CODE
+%% 
+%% Do not distribute this file without also distributing the
+%% source files specified above.
+%% 
+%% Do not distribute a modified version of this file under the same name.
+%% 
+%% File: frunge-lettrine.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
+\newif\iffrlet@disable
+\frlet@disablefalse
+\newif\iffrlet@thinline
+\frlet@thinlinefalse
+
+\def\frlet@colori{black}
+\def\frlet@colorii{red}
+
+\RequirePackage{xkeyval}
+\DeclareOptionX{random}{\def\frlet@random{#1}}
+\DeclareOptionX{font}{\def\frlet@font{#1}}
+\DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
+\DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
+\DeclareOptionX{disable}{\frlet@disabletrue}
+\DeclareOptionX{thinline}{\frlet@thinlinetrue}
+\ProcessOptionsX
+
+\iffrlet@disable%
+  \endinput%
+  \else%
+\fi%
+
+\RequirePackage{
+  lettrine
+}
+\def\frlet@capital#1#2{
+  \lettrine{\color{\frlet@colori}#1}{\color{\frlet@colorii}#2}%
+  \llap{\lettrine{\color{\frlet@colori}#2}{\color{\frlet@colorii}#1}}%
+}
+
+\AtBeginDocument{
+  \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}
+  \everypar={\neweverypar\frlet@capital}
+
+  \let\@Startsection\@startsection
+  \def\@startsection{%
+  \everypar{}%
+  \@Startsection}
+  \let\@Xsect\@xsect
+  \def\@xsect#1{%
+  \@Xsect{#1}%
+  \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
+  \ignorespaces}
+  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}
+  \everypar={\neweverypar\frlet@capital}
+}
+%% 
+%%
+%% End of file `frunge-lettrine.sty'.
