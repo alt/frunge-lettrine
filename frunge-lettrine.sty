@@ -40,8 +40,13 @@
   lettrine
 }
 \def\frlet@capital#1#2{
-  \lettrine{\color{\frlet@colori}#1}{\color{\frlet@colorii}#2}%
-  \llap{\lettrine{\color{\frlet@colori}#2}{\color{\frlet@colorii}#1}}%
+  \lettrine{\color{\frlet@colori}
+           \fontspec{\frlet@font}#1}
+           {\color{\frlet@colorii}#2}%
+  \llap{
+    \lettrine{\color{\frlet@colori}
+              \fontspec{\frlet@font}#1}
+              {\color{\frlet@colorii}#2}}%
 }
 
 \AtBeginDocument{
