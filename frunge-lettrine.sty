@@ -30,7 +30,6 @@
 \DeclareOptionX{disable}{\frlet@disabletrue}
 \DeclareOptionX{thinline}{\frlet@thinlinetrue}
 \ProcessOptionsX
-
 \iffrlet@disable%
   \endinput%
   \else%
@@ -39,31 +38,49 @@
 \RequirePackage{
   lettrine
 }
-\def\frlet@capital#1#2{
-  \lettrine{\color{\frlet@colori}
-           \fontspec{\frlet@font}#1}
-           {\color{\frlet@colorii}#2}%
-  \llap{
-    \lettrine{\color{\frlet@colori}
-              \fontspec{\frlet@font}#1}
-              {\color{\frlet@colorii}#2}}%
+\def\frlet@c@pital#1#2{%
+\frlet@before%
+  \lettrine{\color{\frlet@colori}%
+      \fontspec{\frlet@font}#1}%
+      {}%
+  \rlap{\lettrine{\color{\frlet@colorii}%
+      \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
+        {}%
+      }%
+  \MakeUppercase{#2}%
+\frlet@after%
 }
-
-\AtBeginDocument{
-  \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}
-  \everypar={\neweverypar\frlet@capital}
-
+\def\frlet@after{}%
+\def\frlet@before{}%
+\newcommand\frlet@capital[3][1]{%
+\vspace{-13.6pt}%
+  \def\frlet@linerep{#1}%
+  \frlet@c@pital{#2}{#3}%
+}
+\iffrlet@thinline%
+  \def\frlet@after{%
+  \let\oldpar\par%
+  \linethickness{.3pt}%
+  \begin{picture}(0,0)%
+    \multiput(-13.6,0)(0,-13.6){\frlet@linerep}{%
+    \line(1,0){159}}%
+  \end{picture}%
+  }
+\fi
+\AtBeginDocument{%
+  \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}%
+  \everypar={\neweverypar\frlet@capital}%
   \let\@Startsection\@startsection
   \def\@startsection{%
   \everypar{}%
-  \@Startsection}
-  \let\@Xsect\@xsect
+  \@Startsection}%
+  \let\@Xsect\@xsect%
   \def\@xsect#1{%
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
-  \ignorespaces}
-  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}
-  \everypar={\neweverypar\frlet@capital}
+  \ignorespaces}%
+  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}%
+  \everypar={\neweverypar\frlet@capital}%
 }
 %% 
 %%

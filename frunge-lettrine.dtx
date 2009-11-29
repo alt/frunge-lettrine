@@ -32,7 +32,8 @@ Do not distribute a modified version of this file under the same name.
 \documentclass{gmdocc}
 \usepackage{
   hyperref,
-  polyglossia
+  polyglossia,
+  xcolor
 }
 \hypersetup{
   pdfborder= 0 0 0,
@@ -63,15 +64,16 @@ There is not much to say about using the package: just load it with
 where \verb|option| are:
 
 \subsection{Package Options}
-No options implemented so far. Aims are:
+\let\olditem\item
+\def\item[#1]{\olditem[\color{deepblue}#1]}
 \begin{description}
-\item choose the font the lettrines are taken from
-\item choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
-\item disable “lettrination“ – just use the thin line under the letters
-\item enable the thin line under letters
 \item[maincolor] sets the main color of the lettrines (mostly black)
 \item[ornamentcolor] color used for the ornaments (maybe red?)
-\item ?
+\item[font] Must be given! Chooses the font the initials are taken from. The ornaments should be taken from |font_ornaments|. (There is no such font so far, so nothing is implemented regarding this).
+\item[?] choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
+\item[?] disable “lettrination“ – just use the thin line under the letters (not yet implemented)
+\item[?] enable the thin line under letters (not yet implemented)
+\item[many other useful things] …
 \end{description}
 
 \subsection{}
@@ -104,7 +106,6 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \DeclareOptionX{disable}{\frlet@disabletrue}
 \DeclareOptionX{thinline}{\frlet@thinlinetrue}
 \ProcessOptionsX
-
 % \end{macrocode}
 % If disable is given, the package will stop doing anything. The thin line that is planned would be coded right here before the |\if|.
 % \begin{macrocode}
@@ -122,36 +123,61 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   lettrine
 }
 % \end{macrocode}
-%\begin{macro} We want to modify |\lettrine| a bit, so we define 
+%\begin{macro} We want to modify |\lettrine| a bit, so we define a wrapper macro. The hooks |\frlet@before| and |\frlet@after| are used to implement additional code.
 % \begin{macrocode}
-\def\frlet@capital#1#2{
-  \lettrine{\color{\frlet@colori}
-           \fontspec{\frlet@font}#1}
-           {\color{\frlet@colorii}#2}%
-  \llap{
-    \lettrine{\color{\frlet@colori}
-              \fontspec{\frlet@font}#1}
-              {\color{\frlet@colorii}#2}}%
+\def\frlet@c@pital#1#2{%
+\frlet@before%
+  \lettrine{\color{\frlet@colori}%
+      \fontspec{\frlet@font}#1}%
+      {}%
+  \rlap{\lettrine{\color{\frlet@colorii}%
+      \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
+        {}%
+      }%
+  \MakeUppercase{#2}%
+\frlet@after%
 }
 % \end{macrocode}
 % \end{macro}
-
+\def\frlet@after{}%
+\def\frlet@before{}%
+% The following code tries to implement the thin lines under each line. This is so far a very (!) stupid implementation that even might crash.
 % \begin{macrocode}
-\AtBeginDocument{
-  \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}
-  \everypar={\neweverypar\frlet@capital} 
-
+\newcommand\frlet@capital[3][1]{%
+\vspace{-13.6pt}%
+  \def\frlet@linerep{#1}%
+  \frlet@c@pital{#2}{#3}%
+}
+\iffrlet@thinline%
+  \def\frlet@after{%
+  \let\oldpar\par%
+  \linethickness{.3pt}%
+  \begin{picture}(0,0)%
+    \multiput(-13.6,0)(0,-13.6){\frlet@linerep}{%
+    \line(1,0){159}}%
+  \end{picture}%
+  }
+\fi
+% \end{macrocode}
+% This wrapper should be used at every paragraph. As |lettrine| internally works with paragraphs, too, the |\everypar| macro is used to alternate itself at every occurance.\footnote{Paul, you are a genius!} This must be set at begin document:
+% \begin{macrocode}
+\AtBeginDocument{%
+  \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}%
+  \everypar={\neweverypar\frlet@capital}%
+% \end{macrocode}
+% As the |\section| macro uses |\everypar| as well, it needs to be redefined to not crash every time:
+% \begin{macrocode}
   \let\@Startsection\@startsection
   \def\@startsection{%
   \everypar{}%
-  \@Startsection}
-  \let\@Xsect\@xsect
+  \@Startsection}%
+  \let\@Xsect\@xsect%
   \def\@xsect#1{%
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
-  \ignorespaces}
-  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}
-  \everypar={\neweverypar\frlet@capital}
+  \ignorespaces}%
+  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}%
+  \everypar={\neweverypar\frlet@capital}%
 }
 % \end{macrocode}
 % \Finale
