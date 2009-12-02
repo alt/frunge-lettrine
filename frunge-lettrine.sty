@@ -21,6 +21,7 @@
 
 \def\frlet@colori{black}
 \def\frlet@colorii{red}
+\def\frlet@linethickness{.1pt}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{random}{\def\frlet@random{#1}}
@@ -29,16 +30,17 @@
 \DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
 \DeclareOptionX{disable}{\frlet@disabletrue}
 \DeclareOptionX{thinline}{\frlet@thinlinetrue}
+\DeclareOptionX{line}{\def\frlet@linethickness{#1}}
 \ProcessOptionsX
 \iffrlet@disable%
   \endinput%
-  \else%
 \fi%
-
 \RequirePackage{
-  lettrine
+  lettrine,
+  ulem
 }
-\def\frlet@c@pital#1#2{%
+\def\frlet@capital#1#2{%
+\vspace{-\the\skip12}  %% this is baselineskip!
 \frlet@before%
   \lettrine{\color{\frlet@colori}%
       \fontspec{\frlet@font}#1}%
@@ -47,26 +49,11 @@
       \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
         {}%
       }%
-  \MakeUppercase{#2}%
+  \MakeUppercase{\uline{#2}}%
 \frlet@after%
 }
 \def\frlet@after{}%
 \def\frlet@before{}%
-\newcommand\frlet@capital[3][1]{%
-\vspace{-13.6pt}%
-  \def\frlet@linerep{#1}%
-  \frlet@c@pital{#2}{#3}%
-}
-\iffrlet@thinline%
-  \def\frlet@after{%
-  \let\oldpar\par%
-  \linethickness{.3pt}%
-  \begin{picture}(0,0)%
-    \multiput(-13.6,0)(0,-13.6){\frlet@linerep}{%
-    \line(1,0){159}}%
-  \end{picture}%
-  }
-\fi
 \AtBeginDocument{%
   \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}%
   \everypar={\neweverypar\frlet@capital}%
@@ -79,9 +66,12 @@
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
-  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}%
-  \everypar={\neweverypar\frlet@capital}%
 }
+\iffrlet@thinline%
+  \renewcommand{\ULthickness}{\frlet@linethickness}
+  \def\ULdepth{0pt}
+  \def\frlet@after{\uline}
+\fi
 %% 
 %%
 %% End of file `frunge-lettrine.sty'.

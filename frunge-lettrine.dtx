@@ -51,7 +51,7 @@ Do not distribute a modified version of this file under the same name.
 \begin{document}
 \maketitle
 \begin{abstract}
-This is the documentation of the package |frunge-lettrine|. It aims to offer a simple way to use beautiful lettrine at the beginning of every paragraph. Also, a thin line is planned to be set on the base of every line to simulate the handwritings of old times. (Not yet implemented.)
+This is the documentation of the package |frunge-lettrine|. It aims to offer a simple way to use beautiful lettrine at the beginning of every paragraph. Also, a thin line is can be set under each line of types to simulate the old handwritings and very early printings.
 
 Based on the frunge project, it will take some time to be really usefull. If you want to contribute to frunge, just google it and mail to the projet mailing list ;)
 \end{abstract}
@@ -61,18 +61,19 @@ There is not much to say about using the package: just load it with
 \begin{verbatim}
 \usepackage[options]{frunge-lettrine}
 \end{verbatim}
-where \verb|option| are:
+where \verb|options| are:
 
 \subsection{Package Options}
 \let\olditem\item
 \def\item[#1]{\olditem[\color{deepblue}#1]}
 \begin{description}
-\item[maincolor] sets the main color of the lettrines (mostly black)
-\item[ornamentcolor] color used for the ornaments (maybe red?)
-\item[font] Must be given! Chooses the font the initials are taken from. The ornaments should be taken from |font_ornaments|. (There is no such font so far, so nothing is implemented regarding this).
-\item[?] choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
-\item[?] disable “lettrination“ – just use the thin line under the letters (not yet implemented)
-\item[?] enable the thin line under letters (not yet implemented)
+\item[maincolor =] sets the main color of the lettrines (mostly black)
+\item[ornamentcolor =] color used for the ornaments (maybe red?)
+\item[font =] Must be given! Chooses the font the initials are taken from. The ornaments should be taken from |font_ornaments|. (There is no such font so far, so nothing is implemented regarding this).
+\item[thinline] enable the thin line under letters. No argument required. But beware! This is a very dangerous thing. Even a footnote will break your document! Don’t write anything eles than plain text when using this. (floats are ok, though)
+\item[line=] sets the thickness of the thin line. Use as |line=0.1pt|. Good values are below |.1pt|!
+\item[?] choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?) (not yet implemented)
+\item[?] disable “lettrination“ – just use the thin line under the letters (not possible so far, but no big deal to do)
 \item[many other useful things] …
 \end{description}
 
@@ -87,8 +88,8 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 %</driver>
 %
 %<*package>
-% \fi
-% This would be a good place to load package options. Just in case we need some, we write some placeholders here:
+% \fi> 
+% First, definition of the package options and processing by |xkeyval|:
 % \begin{macrocode}
 \newif\iffrlet@disable
 \frlet@disablefalse
@@ -97,6 +98,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 
 \def\frlet@colori{black}
 \def\frlet@colorii{red}
+\def\frlet@linethickness{.1pt}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{random}{\def\frlet@random{#1}}
@@ -105,27 +107,27 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
 \DeclareOptionX{disable}{\frlet@disabletrue}
 \DeclareOptionX{thinline}{\frlet@thinlinetrue}
+\DeclareOptionX{line}{\def\frlet@linethickness{#1}}
 \ProcessOptionsX
 % \end{macrocode}
-% If disable is given, the package will stop doing anything. The thin line that is planned would be coded right here before the |\if|.
+% If |disable| is given, the package will stop doing anything:
 % \begin{macrocode}
 \iffrlet@disable%
   \endinput%
-  \else%
 \fi%
-
 % \end{macrocode}
-% Once again: These options don’t do anything yet!
-% 
-% Load the needed packages:
+% Load the needed packages; lettrine for the capitals, ulem for the thin line.
 % \begin{macrocode}
 \RequirePackage{
-  lettrine
+  lettrine,
+  ulem
 }
 % \end{macrocode}
+% \subsection{Capitals}
 %\begin{macro} We want to modify |\lettrine| a bit, so we define a wrapper macro. The hooks |\frlet@before| and |\frlet@after| are used to implement additional code.
 % \begin{macrocode}
-\def\frlet@c@pital#1#2{%
+\def\frlet@capital#1#2{%
+\vspace{-\the\skip12}  %% this is baselineskip!
 \frlet@before%
   \lettrine{\color{\frlet@colori}%
       \fontspec{\frlet@font}#1}%
@@ -134,31 +136,13 @@ This package would be useless without the wonderfull lettrine package by Daniel 
       \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
         {}%
       }%
-  \MakeUppercase{#2}%
+  \MakeUppercase{\uline{#2}}%
 \frlet@after%
 }
 % \end{macrocode}
 % \end{macro}
 \def\frlet@after{}%
 \def\frlet@before{}%
-% The following code tries to implement the thin lines under each line. This is so far a very (!) stupid implementation that even might crash.
-% \begin{macrocode}
-\newcommand\frlet@capital[3][1]{%
-\vspace{-13.6pt}%
-  \def\frlet@linerep{#1}%
-  \frlet@c@pital{#2}{#3}%
-}
-\iffrlet@thinline%
-  \def\frlet@after{%
-  \let\oldpar\par%
-  \linethickness{.3pt}%
-  \begin{picture}(0,0)%
-    \multiput(-13.6,0)(0,-13.6){\frlet@linerep}{%
-    \line(1,0){159}}%
-  \end{picture}%
-  }
-\fi
-% \end{macrocode}
 % This wrapper should be used at every paragraph. As |lettrine| internally works with paragraphs, too, the |\everypar| macro is used to alternate itself at every occurance.\footnote{Paul, you are a genius!} This must be set at begin document:
 % \begin{macrocode}
 \AtBeginDocument{%
@@ -176,9 +160,32 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
-  \def\neweverypar{\everypar{\everypar{\neweverypar\frlet@capital}}}%
-  \everypar={\neweverypar\frlet@capital}%
 }
 % \end{macrocode}
+% \subsection{Thin Line}
+% As we want to set the fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I don’t have to say ”thin line“ all the time …} under each row, we use the package ulem, change the behaviour a little bit and use it in the |\frlet@after|-hook. Now, the |\uline| macro should take the whole paragraph as argument, but I didn’t manage to get the grouping right. So if you use this feature, you have to write a |{| between the second and third token (letter) of your paragraph and a |}| at the very end of it. I hope this bug will soon change …
+% \begin{macrocode}
+\iffrlet@thinline%
+  \renewcommand{\ULthickness}{\frlet@linethickness}
+  \def\ULdepth{0pt}
+  \def\frlet@after{\uline}
+\fi
+% \end{macrocode}
+% \section{Example}
+% A short example how to use this package in real life:
+% \begin{verbatim}
+% \usepackage[
+%   thinline,
+%   line=.05pt,
+%   maincolor=black,
+%   ornamentcolor=red,
+%   font={FloralCapsLettrine}
+% ]{frunge-lettrine}
+% \begin{document}
+% Th{is is a first paragraph to test this package.}
+% 
+% T{his}{ is a second one trying to set three letters in upper case.}
+% \end{document}
+% \end{verbatim}
 % \Finale
 % \endinput
