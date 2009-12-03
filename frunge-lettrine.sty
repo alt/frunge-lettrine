@@ -25,16 +25,20 @@
 \def\frlet@colori{black}
 \def\frlet@colorii{red}
 \def\frlet@linethickness{.1pt}
+\def\frlet@lines{2}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
-\DeclareOptionX{thinline}{\setboolean{frlet@thinline}{true}}
+\DeclareOptionX{thinline}{%
+  \setboolean{frlet@thinline}{true}%
+  \def\frlet@linethickness{#1}%
+}
 \DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{random}{\def\frlet@random{#1}}
 \DeclareOptionX{font}{\def\frlet@font{#1}}
 \DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
-\DeclareOptionX{line}{\def\frlet@linethickness{#1}}
+\DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \ProcessOptionsX
 \iffrlet@disable%
   \endinput%
@@ -43,19 +47,23 @@
   lettrine,
   ulem
 }
-\def\frlet@capital#1#2{%
+\setcounter{DefaultLines}{\frlet@lines}
+\def\frletsetlines#1{\setcounter{DefaultLines}{#1}}
+\def\frlet@capital{\frlet@c@pital}
+\def\frlet@c@pital#1#2{%
   \vspace{-\the\skip12}  %% this is baselineskip!
   \frlet@before%
-  \lettrine{\color{\frlet@colori}%
-      \fontspec{\frlet@font}#1}%
+  \lettrine{%
+      \iffrlet@draft\else
+        \hbox to 0cm{%
+          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern-.1em\raisebox{.2ex}{#1}%
+        }%
+      \fi
+        \fontspec{\frlet@font}\color{\frlet@colori}#1}%
       {}%
   \iffrlet@draft
     #2\unskip
   \else
-    \rlap{\lettrine{\color{\frlet@colorii}%
-        \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
-          {}%
-        }%
     \MakeUppercase{\uline{#2}}%
   \fi
   \frlet@after%
@@ -80,7 +88,7 @@
   \ignorespaces}%
 }
 \def\disablefrlet{\def\frlet@capital{}}
-
+\def\enablefrlet{\def\frlet@capital{\frlet@c@pital}\everypar\expandafter{\the\everypar\neweverypar\frlet@capital}}
 \iffrlet@draft\else
   \iffrlet@thinline%
     \renewcommand{\ULthickness}{\frlet@linethickness}

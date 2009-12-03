@@ -70,16 +70,21 @@ where \verb|options| are:
 \item[font =] Must be given! Chooses the font the initials are taken from. The ornaments should be taken from |font_ornaments|. (There is no such font so far, if you want to provide one or want to see an example, feel free to contact me!)
 \item[maincolor =] sets the main color of the lettrines (mostly black)
 \item[ornamentcolor =] color used for the ornaments (e.\,g. red)
-\item[thinline] enable the thin line under letters. No argument required. But beware! This is a very dangerous thing. Even a footnote will break your document! Don’t write anything eles than plain text when using this. (floats are ok, though) See also the comments in the regarding section.
-\item[line=] sets the thickness of the thin line. Use as |line=0.1pt|. Good values are below |.1pt|!
-\item[random=] choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?) (not yet implemented)
+\item[lines=] Sets the number of lines for the lettrines (default is 2)
+\item[thinline=] Enables the thin line under letters and sets the thickness to the given amount. See line \ref{thinline} below.
+\item[random=]  (not yet implemented) choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
 \item[disable] disable “lettrination“ – just use the thin line under the letters (so far, the package does nothing at all if |disalbe| is given)
-\item[draft] in |draft| mode, no ornaments are printed, no thin lines, but only the big letters. Must be given explicitly (cannot be taken from documentclass’ |draft|!)
-\item[many other useful things] …
+\item[draft] in |draft| mode, no ornaments are printed, no thin lines, but only the big letters. Must be given explicitly (cannot be taken from documentclass |draft|!)
 \end{description}
 
 \subsection{Macro Commands}
-There are some possibilities to manually adjust the positioning of the lettrines and the ornaments.
+These are the possible user-level commands which can be used to change the behaviour of the package in the document. Most of this is quite simple and robust.
+\begin{description}
+\def\item[#1]{\olditem[\color{deepblue}\textbackslash #1]}
+\item[frletsetlines] Change the lines every lettrine uses.
+\item[disablefrlet] Disable the lettrination
+\item[enablefrlet] Re-enable lettrination. See line \ref{sec:disableenable} for further details
+\end{description}
 
 \section{Thanks}
 This package would be useless without the wonderfull lettrine package by Daniel Flipo. And it would have never been born without the help of Paul Isambert, who actually wrote all the important code. Thanks a lot!
@@ -104,16 +109,20 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \def\frlet@colori{black}
 \def\frlet@colorii{red}
 \def\frlet@linethickness{.1pt}
+\def\frlet@lines{2}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
-\DeclareOptionX{thinline}{\setboolean{frlet@thinline}{true}}
+\DeclareOptionX{thinline}{%
+  \setboolean{frlet@thinline}{true}%
+  \def\frlet@linethickness{#1}%
+}
 \DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{random}{\def\frlet@random{#1}}
 \DeclareOptionX{font}{\def\frlet@font{#1}}
 \DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
-\DeclareOptionX{line}{\def\frlet@linethickness{#1}}
+\DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \ProcessOptionsX
 % \end{macrocode}
 % If |disable| is given, the package will stop loading right here:
@@ -128,15 +137,23 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   lettrine,
   ulem
 }
+\setcounter{DefaultLines}{\frlet@lines}
+\def\frletsetlines#1{\setcounter{DefaultLines}{#1}}
 % \end{macrocode}
 % \subsection{Capitals}
 %\begin{macro} We want to modify |\lettrine| a bit, so we define a wrapper macro. The hooks |\frlet@before| and |\frlet@after| are used to implement additional code.
 % \begin{macrocode}
-\def\frlet@capital#1#2{%
+\def\frlet@capital{\frlet@c@pital}
+\def\frlet@c@pital#1#2{%
   \vspace{-\the\skip12}  %% this is baselineskip!
   \frlet@before%
-  \lettrine{\color{\frlet@colori}%
-      \fontspec{\frlet@font}#1}%
+  \lettrine{%
+      \iffrlet@draft\else
+        \hbox to 0cm{%
+          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern-.1em\raisebox{.2ex}{#1}%
+        }%
+      \fi
+        \fontspec{\frlet@font}\color{\frlet@colori}#1}%
       {}%
 % \end{macrocode}
 % If the |draft| option is given, no ornaments and thin lines should be printed.
@@ -144,10 +161,6 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \iffrlet@draft
     #2\unskip
   \else
-    \rlap{\lettrine{\color{\frlet@colorii}%
-        \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
-          {}%
-        }%
     \MakeUppercase{\uline{#2}}%
   \fi
   \frlet@after%
@@ -181,10 +194,17 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \ignorespaces}%
 }
 % \end{macrocode}
+% The lettrines should be able to be disabled and enabled in the document. The following user-level macros do so. But they might do strange things, so be careful!
+% \label{sec:disableenable}
+% \begin{macrocode}
 \def\disablefrlet{\def\frlet@capital{}}
-
+\def\enablefrlet{\def\frlet@capital{\frlet@c@pital}\everypar\expandafter{\the\everypar\neweverypar\frlet@capital}}
+% \end{macrocode}
 % \subsection{Thin Line}
-% As we want to set the fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I don’t have to say ”thin line“ all the time …} under each row, we use the package ulem, change the behaviour a little bit and use it in the |\frlet@after|-hook. Now, the |\uline| macro should take the whole paragraph as argument, but I didn’t manage to get the grouping right. So if you use this feature, you have to write a |{| between the second and third token (letter) of your paragraph and a |}| at the very end of it. I hope this bug will soon change …
+% \label{thinline}
+% Beware! This is a very dangerous thing. Even a footnote will break your document when using thin lines! Don’t write anything eles than plain text when using this. (floats are ok, though) Good values for the thickness are below |0.1pt|, so say e.\,g. |thinline=0.05pt|.
+% 
+% To typeset this fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I don’t have to say ”thin line“ all the time …} under each row, we use the package ulem, change the behaviour a little bit and use it in the |\frlet@after|-hook. Now, the |\uline| macro should take the whole paragraph as argument, but I didn’t manage to get the grouping right. So if you use this feature, you have to write a |{| between the second and third token (letter) of your paragraph and a |}| at the very end of it. I hope this bug will soon change …
 % \begin{macrocode}
 \iffrlet@draft\else
   \iffrlet@thinline%
