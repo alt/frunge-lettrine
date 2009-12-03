@@ -26,6 +26,7 @@
 \def\frlet@colorii{red}
 \def\frlet@linethickness{.1pt}
 \def\frlet@lines{2}
+\def\frlet@kern@before@ornament{-.2em}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
@@ -56,7 +57,7 @@
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
-          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern-.1em\raisebox{.2ex}{#1}%
+          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern\frlet@kern@before@ornament\raisebox{.2ex}{#1}%
         }%
       \fi
         \fontspec{\frlet@font}\color{\frlet@colori}#1}%
@@ -72,7 +73,7 @@
 \def\frlet@before{}%
 \newcommand{\kernbeforelettrine}[1]{}
 \newcommand{\kernafterlettrine}{}
-\newcommand{\kernbeforeornament}{}
+\newcommand{\kernbeforeornament}[1]{\def\frlet@kern@before@ornament{#1}}
 \newcommand{\kernafterornament}{}
 \AtBeginDocument{%
   \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}%

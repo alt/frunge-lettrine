@@ -28,7 +28,7 @@ Do not distribute a modified version of this file under the same name.
   \expandafter\endgroup
 \fi
 \ProvidesFile{frunge-lettrine.sty}
-  [24.11.2009 v0.b1 using lettrine to produce beautiful frunge-based documents]
+  [03.12.2009 v0.c using lettrine to produce beautiful frunge-based documents]
 \documentclass{gmdocc}
 \usepackage{
   hyperref,
@@ -110,6 +110,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \def\frlet@colorii{red}
 \def\frlet@linethickness{.1pt}
 \def\frlet@lines{2}
+\def\frlet@kern@before@ornament{-.2em}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
@@ -150,7 +151,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
-          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern-.1em\raisebox{.2ex}{#1}%
+          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern\frlet@kern@before@ornament\raisebox{.2ex}{#1}%
         }%
       \fi
         \fontspec{\frlet@font}\color{\frlet@colori}#1}%
@@ -172,7 +173,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \begin{macrocode}
 \newcommand{\kernbeforelettrine}[1]{}
 \newcommand{\kernafterlettrine}{}
-\newcommand{\kernbeforeornament}{}
+\newcommand{\kernbeforeornament}[1]{\def\frlet@kern@before@ornament{#1}}
 \newcommand{\kernafterornament}{}
 % \end{macrocode}
 % This wrapper should be used at every paragraph. As |lettrine| internally works with paragraphs, too, the |\everypar| macro is used to alternate itself at every occurance.\footnote{Paul, you are a genius!} This must be set at begin document:
