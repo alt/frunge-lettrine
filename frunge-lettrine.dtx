@@ -181,6 +181,8 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \ignorespaces}%
 }
 % \end{macrocode}
+\def\disablefrlet{\def\frlet@capital{}}
+
 % \subsection{Thin Line}
 % As we want to set the fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I don’t have to say ”thin line“ all the time …} under each row, we use the package ulem, change the behaviour a little bit and use it in the |\frlet@after|-hook. Now, the |\uline| macro should take the whole paragraph as argument, but I didn’t manage to get the grouping right. So if you use this feature, you have to write a |{| between the second and third token (letter) of your paragraph and a |}| at the very end of it. I hope this bug will soon change …
 % \begin{macrocode}

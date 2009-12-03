@@ -79,6 +79,8 @@
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
 }
+\def\disablefrlet{\def\frlet@capital{}}
+
 \iffrlet@draft\else
   \iffrlet@thinline%
     \renewcommand{\ULthickness}{\frlet@linethickness}
