@@ -14,22 +14,26 @@
 %% Do not distribute a modified version of this file under the same name.
 %% 
 %% File: frunge-lettrine.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
-\newif\iffrlet@disable
-\frlet@disablefalse
-\newif\iffrlet@thinline
-\frlet@thinlinefalse
+\RequirePackage{ifthen}
+\newboolean{frlet@disable}
+\newboolean{frlet@thinline}
+\newboolean{frlet@draft}
+\setboolean{frlet@disable}{false}
+\setboolean{frlet@thinline}{false}
+\setboolean{frlet@draft}{false}
 
 \def\frlet@colori{black}
 \def\frlet@colorii{red}
 \def\frlet@linethickness{.1pt}
 
 \RequirePackage{xkeyval}
+\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
+\DeclareOptionX{thinline}{\setboolean{frlet@thinline}{true}}
+\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{random}{\def\frlet@random{#1}}
 \DeclareOptionX{font}{\def\frlet@font{#1}}
 \DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
-\DeclareOptionX{disable}{\frlet@disabletrue}
-\DeclareOptionX{thinline}{\frlet@thinlinetrue}
 \DeclareOptionX{line}{\def\frlet@linethickness{#1}}
 \ProcessOptionsX
 \iffrlet@disable%
@@ -40,20 +44,28 @@
   ulem
 }
 \def\frlet@capital#1#2{%
-\vspace{-\the\skip12}  %% this is baselineskip!
-\frlet@before%
+  \vspace{-\the\skip12}  %% this is baselineskip!
+  \frlet@before%
   \lettrine{\color{\frlet@colori}%
       \fontspec{\frlet@font}#1}%
       {}%
-  \rlap{\lettrine{\color{\frlet@colorii}%
-      \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
-        {}%
-      }%
-  \MakeUppercase{\uline{#2}}%
-\frlet@after%
+  \iffrlet@draft
+    #2\unskip
+  \else
+    \rlap{\lettrine{\color{\frlet@colorii}%
+        \fontspec{\frlet@font_ornaments1}#1\kern-.25em}%
+          {}%
+        }%
+    \MakeUppercase{\uline{#2}}%
+  \fi
+  \frlet@after%
 }
 \def\frlet@after{}%
 \def\frlet@before{}%
+\newcommand{\kernbeforelettrine}[1]{}
+\newcommand{\kernafterlettrine}{}
+\newcommand{\kernbeforeornament}{}
+\newcommand{\kernafterornament}{}
 \AtBeginDocument{%
   \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}%
   \everypar={\neweverypar\frlet@capital}%
@@ -67,10 +79,12 @@
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
 }
-\iffrlet@thinline%
-  \renewcommand{\ULthickness}{\frlet@linethickness}
-  \def\ULdepth{0pt}
-  \def\frlet@after{\uline}
+\iffrlet@draft\else
+  \iffrlet@thinline%
+    \renewcommand{\ULthickness}{\frlet@linethickness}
+    \def\ULdepth{0pt}
+    \def\frlet@after{\uline}
+  \fi
 \fi
 %% 
 %%
