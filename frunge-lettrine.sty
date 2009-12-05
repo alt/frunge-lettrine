@@ -26,7 +26,9 @@
 \def\frlet@colorii{red}
 \def\frlet@linethickness{.1pt}
 \def\frlet@lines{2}
-\def\frlet@kern@before@ornament{-.2em}
+\def\frlet@kern@ornament{-.2em}
+\def\frlet@raise@ornament{.2ex}
+\def\frlet@linedepth{0pt}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
@@ -40,6 +42,7 @@
 \DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
+\DeclareOptionX{depth}{\def\frlet@linedepth{#1}}
 \ProcessOptionsX
 \iffrlet@disable%
   \endinput%
@@ -57,7 +60,9 @@
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
-          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern\frlet@kern@before@ornament\raisebox{.2ex}{#1}%
+          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}%
+            \kern\frlet@kern@ornament%
+            \raisebox{\frlet@raise@ornament}{#1}%
         }%
       \fi
         \fontspec{\frlet@font}\color{\frlet@colori}#1}%
@@ -71,10 +76,10 @@
 }
 \def\frlet@after{}%
 \def\frlet@before{}%
+\newcommand{\raiseornament}[1]{\def\frlet@raise@ornament{#1}}
 \newcommand{\kernbeforelettrine}[1]{}
-\newcommand{\kernafterlettrine}{}
-\newcommand{\kernbeforeornament}[1]{\def\frlet@kern@before@ornament{#1}}
-\newcommand{\kernafterornament}{}
+\newcommand{\kernafterlettrine}[1]{}
+\newcommand{\kernornament}[1]{\def\frlet@kern@ornament{#1}}
 \AtBeginDocument{%
   \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}%
   \everypar={\neweverypar\frlet@capital}%
@@ -93,7 +98,7 @@
 \iffrlet@draft\else
   \iffrlet@thinline%
     \renewcommand{\ULthickness}{\frlet@linethickness}
-    \def\ULdepth{0pt}
+    \def\ULdepth{\frlet@linedepth}
     \def\frlet@after{\uline}
   \fi
 \fi

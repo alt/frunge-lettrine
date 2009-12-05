@@ -28,7 +28,7 @@ Do not distribute a modified version of this file under the same name.
   \expandafter\endgroup
 \fi
 \ProvidesFile{frunge-lettrine.sty}
-  [03.12.2009 v0.c using lettrine to produce beautiful frunge-based documents]
+  [03.12.2009 v0.c1 using lettrine to produce beautiful frunge-based documents]
 \documentclass{gmdocc}
 \usepackage{
   hyperref,
@@ -110,7 +110,9 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \def\frlet@colorii{red}
 \def\frlet@linethickness{.1pt}
 \def\frlet@lines{2}
-\def\frlet@kern@before@ornament{-.2em}
+\def\frlet@kern@ornament{-.2em}
+\def\frlet@raise@ornament{.2ex}
+\def\frlet@linedepth{0pt}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
@@ -124,6 +126,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
+\DeclareOptionX{depth}{\def\frlet@linedepth{#1}}
 \ProcessOptionsX
 % \end{macrocode}
 % If |disable| is given, the package will stop loading right here:
@@ -151,7 +154,9 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
-          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}\kern\frlet@kern@before@ornament\raisebox{.2ex}{#1}%
+          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}%
+            \kern\frlet@kern@ornament%
+            \raisebox{\frlet@raise@ornament}{#1}%
         }%
       \fi
         \fontspec{\frlet@font}\color{\frlet@colori}#1}%
@@ -171,10 +176,10 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \end{macrocode}
 % \end{macro}
 % \begin{macrocode}
+\newcommand{\raiseornament}[1]{\def\frlet@raise@ornament{#1}}
 \newcommand{\kernbeforelettrine}[1]{}
-\newcommand{\kernafterlettrine}{}
-\newcommand{\kernbeforeornament}[1]{\def\frlet@kern@before@ornament{#1}}
-\newcommand{\kernafterornament}{}
+\newcommand{\kernafterlettrine}[1]{}
+\newcommand{\kernornament}[1]{\def\frlet@kern@ornament{#1}}
 % \end{macrocode}
 % This wrapper should be used at every paragraph. As |lettrine| internally works with paragraphs, too, the |\everypar| macro is used to alternate itself at every occurance.\footnote{Paul, you are a genius!} This must be set at begin document:
 % \begin{macrocode}
@@ -210,7 +215,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \iffrlet@draft\else
   \iffrlet@thinline%
     \renewcommand{\ULthickness}{\frlet@linethickness}
-    \def\ULdepth{0pt}
+    \def\ULdepth{\frlet@linedepth}
     \def\frlet@after{\uline}
   \fi
 \fi
