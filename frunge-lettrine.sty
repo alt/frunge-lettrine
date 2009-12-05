@@ -16,56 +16,61 @@
 %% File: frunge-lettrine.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
 \RequirePackage{ifthen}
 \newboolean{frlet@disable}
-\newboolean{frlet@thinline}
+\newboolean{frlet@printthinline}
 \newboolean{frlet@draft}
+\newboolean{frlet@rubricate}
 \setboolean{frlet@disable}{false}
-\setboolean{frlet@thinline}{false}
+\setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
 
-\def\frlet@colori{black}
-\def\frlet@colorii{red}
-\def\frlet@linethickness{.1pt}
+\def\frlet@maincolor{black}
+\def\frlet@ornamentcolor{red}
+\def\frlet@thinline{.1pt}
 \def\frlet@lines{2}
 \def\frlet@kern@ornament{-.2em}
 \def\frlet@raise@ornament{.2ex}
-\def\frlet@linedepth{0pt}
+\def\frlet@depth{0pt}
 
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
 \DeclareOptionX{thinline}{%
-  \setboolean{frlet@thinline}{true}%
-  \def\frlet@linethickness{#1}%
+  \setboolean{frlet@printthinline}{true}%
+  \def\frlet@thinline{#1}%
 }
 \DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{random}{\def\frlet@random{#1}}
 \DeclareOptionX{font}{\def\frlet@font{#1}}
-\DeclareOptionX{maincolor}{\def\frlet@colori{#1}}
-\DeclareOptionX{ornamentcolor}{\def\frlet@colorii{#1}}
+\DeclareOptionX{maincolor}{\def\frlet@maincolor{#1}}
+\DeclareOptionX{ornamentcolor}{\def\frlet@ornamentcolor{#1}}
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
-\DeclareOptionX{depth}{\def\frlet@linedepth{#1}}
+\DeclareOptionX{depth}{\def\frlet@depth{#1}}
+\DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \ProcessOptionsX
 \iffrlet@disable%
   \endinput%
 \fi%
+
+\DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
+
 \RequirePackage{
   lettrine,
   ulem
 }
-\setcounter{DefaultLines}{\frlet@lines}
-\def\frletsetlines#1{\setcounter{DefaultLines}{#1}}
+
 \def\frlet@capital{\frlet@c@pital}
 \def\frlet@c@pital#1#2{%
+  \setcounter{DefaultLines}{\frlet@lines}%
   \vspace{-\the\skip12}  %% this is baselineskip!
   \frlet@before%
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
-          \fontspec{\frlet@font_ornaments1}\color{\frlet@colorii}%
+          \fontspec{\frlet@font_ornaments1}\color{\frlet@ornamentcolor}%
             \kern\frlet@kern@ornament%
             \raisebox{\frlet@raise@ornament}{#1}%
         }%
       \fi
-        \fontspec{\frlet@font}\color{\frlet@colori}#1}%
+        \fontspec{\frlet@font}\color{\frlet@maincolor}#1}%
       {}%
   \iffrlet@draft
     #2\unskip
@@ -96,9 +101,9 @@
 \def\disablefrlet{\def\frlet@capital{}}
 \def\enablefrlet{\def\frlet@capital{\frlet@c@pital}\everypar\expandafter{\the\everypar\neweverypar\frlet@capital}}
 \iffrlet@draft\else
-  \iffrlet@thinline%
-    \renewcommand{\ULthickness}{\frlet@linethickness}
-    \def\ULdepth{\frlet@linedepth}
+  \iffrlet@printthinline%
+    \renewcommand{\ULthickness}{\frlet@thinline}
+    \def\ULdepth{\frlet@depth}
     \def\frlet@after{\uline}
   \fi
 \fi
