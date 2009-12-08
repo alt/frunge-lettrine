@@ -19,9 +19,12 @@
 \newboolean{frlet@printthinline}
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
+\newboolean{frlet@oldpaper}
+
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
+\setboolean{frlet@oldpaper}{false}
 
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
@@ -45,6 +48,7 @@
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \DeclareOptionX{depth}{\def\frlet@depth{#1}}
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
+\DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
 \ProcessOptionsX
 \iffrlet@disable%
   \endinput%
@@ -97,6 +101,7 @@
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
+  \ifthenelse{\boolean{frlet@oldpaper}}{\pagecolor[rgb]{0.956 0.743 0.496}}{}
 }
 \def\disablefrlet{\def\frlet@capital{}}
 \def\enablefrlet{\def\frlet@capital{\frlet@c@pital}\everypar\expandafter{\the\everypar\neweverypar\frlet@capital}}

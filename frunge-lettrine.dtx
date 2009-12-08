@@ -65,16 +65,18 @@ where \verb|options| are:
 
 \subsection{Package Options}
 \let\olditem\item
-\def\item[#1]{\olditem[\color{deepblue}#1]}
+\def\item[#1]{\olditem[\color{deepblue}#1]\ \newline }
 
 \begin{description}
 \item[disable] disable “lettrination“ – just use the thin line under the letters (so far, the package does nothing at all if |disalbe| is given)
 \item[draft] in |draft| mode, no ornaments are printed, no thin lines, but only the big letters. Must be given explicitly (cannot be taken from documentclass |draft|!)
+\item[oldpaper] Well, this is more a kind of fun-option: As the old book we want to imitate here, are mostly quite – old. And so is their paper. With this option, the pagecolor will be set to the rgb value |0.956 0.743 0.496|. That is surely nothing really meaningful, but maybe it will be useful in future relaeses. Maybe a nice background structure could be used to imitate a smooth, old paper.
 \end{description}
 
 \subsubsection{Fonts}
 \begin{description}
-\item[font =] Must be given! Chooses the font the initials are taken from. The ornaments should be taken from |font_ornaments|. (There is no such font so far, if you want to provide one or want to see an example, feel free to contact me!)
+\item[font =] Must be given! Chooses the font the initials are taken from. The ornaments should be taken from |font_ornaments|.
+(There is no such font so far, if you want to provide one or want to see an example, feel free to contact me!)
 \item[maincolor =] sets the main color of the lettrines (mostly black)
 \item[ornamentcolor =] color used for the ornaments (e.\,g. red)
 \item[random=]  (not yet implemented) choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
@@ -84,19 +86,17 @@ where \verb|options| are:
 \begin{description}
 \item[lines=] Sets the number of lines for the lettrines (default is 2)
 \item[thinline=] Enables the thin line under letters and sets the thickness to the given amount. See line \ref{thinline} below.
-\item[depth=] Sets the depth of this thin line. Defaults to |depht=0pt|.
+\item[depth=] Sets the depth of this thin line. Defaults to |depth=0pt|.
 \end{description}
 
 \subsection{Macro Commands}
-All of the above package options (but draft and disable) can be set at every place in the document by using |\setfrlet| like
-\begin{verbatim}
-\setfrlet{lines}{4}
-\end{verbatim}
-This will change the number of lines the lettrine takes at next occurance to 4.
-
-Furthermore, these are the possible user-level commands which can be used to change the behaviour of the package in the document. Most of this is quite simple and robust.
-\begin{description}
 \def\item[#1]{\olditem[\color{deepblue}\textbackslash #1]}
+\begin{description}
+\item[setfrlet] All of the key-value type package options (like |random|, |font| …) can be changed at every place in the document by |\setfrlet|, e.\,g. |\setfrlet{lines}{4}| will cause the lettrines to take 4 instead of 2 lines at the next occurance.
+\end{description}
+
+There are two more macros:
+\begin{description}
 \item[disablefrlet] Disable the lettrination
 \item[enablefrlet] Re-enable lettrination. See line \ref{sec:disableenable} for further details
 \end{description}
@@ -118,9 +118,12 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \newboolean{frlet@printthinline}
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
+\newboolean{frlet@oldpaper}
+
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
+\setboolean{frlet@oldpaper}{false}
 
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
@@ -144,6 +147,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \DeclareOptionX{depth}{\def\frlet@depth{#1}}
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
+\DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
 \ProcessOptionsX
 % \end{macrocode}
 % If |disable| is given, the package will stop loading right here:
@@ -218,6 +222,10 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
+% \end{macrocode}
+% The imitation of old paper will be activated at begin document, too:
+% \begin{macrocode}
+  \ifthenelse{\boolean{frlet@oldpaper}}{\pagecolor[rgb]{0.956 0.743 0.496}}{}
 }
 % \end{macrocode}
 % The lettrines should be able to be disabled and enabled in the document. The following user-level macros do so. But they might do strange things, so be careful!
