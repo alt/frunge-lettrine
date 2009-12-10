@@ -20,11 +20,13 @@
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
 \newboolean{frlet@oldpaper}
+\newboolean{frlet@foliation}
 
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
 \setboolean{frlet@oldpaper}{false}
+\setboolean{frlet@foliation}{false}
 
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
@@ -33,26 +35,37 @@
 \def\frlet@kern@ornament{-.2em}
 \def\frlet@raise@ornament{.2ex}
 \def\frlet@depth{0pt}
-
 \RequirePackage{xkeyval}
-\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
 \DeclareOptionX{thinline}{%
   \setboolean{frlet@printthinline}{true}%
   \def\frlet@thinline{#1}%
 }
-\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
-\DeclareOptionX{random}{\def\frlet@random{#1}}
 \DeclareOptionX{font}{\def\frlet@font{#1}}
 \DeclareOptionX{maincolor}{\def\frlet@maincolor{#1}}
+\DeclareOptionX{ornamentnumber}{\def\frlet@ornamentnumber{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@ornamentcolor{#1}}
+\DeclareOptionX{ornamentcolor2}{\expandafter\def\csname\frlet@ornamentcolor2\endcsname{#1}}
+\DeclareOptionX{random}{\def\frlet@random{#1}}
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \DeclareOptionX{depth}{\def\frlet@depth{#1}}
+\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
+\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
+\DeclareOptionX{foliation}{\setboolean{frlet@foliation}{true}}
 \ProcessOptionsX
-\iffrlet@disable%
-  \endinput%
-\fi%
+\ifthenelse{\boolean{frlet@disable}}{\endinput}{}%
+\ifthenelse{\boolean{frlet@foliation}}
+  {%
+    \newcounter{frlet@sheet}
+    \RequirePackage{scrpage2}
+    \pagestyle{scrheadings}
+    \automark[subsection]{section}
+    \ofoot{}
+    \lehead{\llap{\thefrlet@sheet\textsuperscript{v}\hspace*{4em}}}
+    \rohead{\stepcounter{frlet@sheet}\rlap{\hspace*{4em}\thefrlet@sheet\textsuperscript{r}}}
+  }
+  {}
 
 \DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
 

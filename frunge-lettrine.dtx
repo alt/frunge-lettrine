@@ -71,6 +71,7 @@ where \verb|options| are:
 \item[disable] disable “lettrination“ – just use the thin line under the letters (so far, the package does nothing at all if |disalbe| is given)
 \item[draft] in |draft| mode, no ornaments are printed, no thin lines, but only the big letters. Must be given explicitly (cannot be taken from documentclass |draft|!)
 \item[oldpaper] Well, this is more a kind of fun-option: As the old book we want to imitate here, are mostly quite – old. And so is their paper. With this option, the pagecolor will be set to the rgb value |0.956 0.743 0.496|. That is surely nothing really meaningful, but maybe it will be useful in future relaeses. Maybe a nice background structure could be used to imitate a smooth, old paper.
+\item[folation] The old books were not numbered by pages, but by sheets. Activating this option will imitate this behaviour.
 \end{description}
 
 \subsubsection{Fonts}
@@ -119,11 +120,13 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
 \newboolean{frlet@oldpaper}
+\newboolean{frlet@foliation}
 
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
 \setboolean{frlet@oldpaper}{false}
+\setboolean{frlet@foliation}{false}
 
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
@@ -132,29 +135,44 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \def\frlet@kern@ornament{-.2em}
 \def\frlet@raise@ornament{.2ex}
 \def\frlet@depth{0pt}
-
+%
 \RequirePackage{xkeyval}
-\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
 \DeclareOptionX{thinline}{%
   \setboolean{frlet@printthinline}{true}%
   \def\frlet@thinline{#1}%
 }
-\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
-\DeclareOptionX{random}{\def\frlet@random{#1}}
+%
 \DeclareOptionX{font}{\def\frlet@font{#1}}
 \DeclareOptionX{maincolor}{\def\frlet@maincolor{#1}}
+\DeclareOptionX{ornamentnumber}{\def\frlet@ornamentnumber{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@ornamentcolor{#1}}
+\DeclareOptionX{ornamentcolor2}{\expandafter\def\csname\frlet@ornamentcolor2\endcsname{#1}}
+\DeclareOptionX{random}{\def\frlet@random{#1}}
+%
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \DeclareOptionX{depth}{\def\frlet@depth{#1}}
+%
+\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
+\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
+\DeclareOptionX{foliation}{\setboolean{frlet@foliation}{true}}
 \ProcessOptionsX
 % \end{macrocode}
 % If |disable| is given, the package will stop loading right here:
 % \begin{macrocode}
-\iffrlet@disable%
-  \endinput%
-\fi%
+\ifthenelse{\boolean{frlet@disable}}{\endinput}{}%
+\ifthenelse{\boolean{frlet@foliation}}
+  {%
+    \newcounter{frlet@sheet}
+    \RequirePackage{scrpage2}
+    \pagestyle{scrheadings}
+    \automark[subsection]{section}
+    \ofoot{}
+    \lehead{\llap{\thefrlet@sheet\textsuperscript{v}\hspace*{4em}}}
+    \rohead{\stepcounter{frlet@sheet}\rlap{\hspace*{4em}\thefrlet@sheet\textsuperscript{r}}}
+  }
+  {}
 
 \DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
 
@@ -264,5 +282,14 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % T{his}{ is a second one trying to set three letters in upper case.}
 % \end{document}
 % \end{verbatim}
+% \section{To Do}
+% A short section to list all things that might be nice to implement:
+% \begin{description}
+% \def\item[#1]{\olditem[\color{deepblue}#1]\ \newline }
+% \item[colors] It might be nice to use three or four colors for every lettrine. So three or four ornaments must be used. Should not be a big problem to implement, but a great problem for a font designer …
+% \item[default font] Just an implementation thing: use a default font if none is given.
+% \item[variable ornament font] Should not just be |font_ornaments| but anything. This could actually get quite nice using totally different fonts …
+% \item[foliation] Instead of page numbers, early books counted the sheets. This was done like f.26\textsuperscript{r} for the 26\textsuperscript{th} sheet, \emph{recto}, i.\,e. frontside. (f.26\textsuperscript{v} for \emph{verso}, backside). There could be a package option to implement this using the classes and packages from koma-bundle.
+% \end{description}
 % \Finale
 % \endinput
