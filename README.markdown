@@ -1,8 +1,18 @@
+# frunge-lettrine
+
 A LaTeX documentclass to insert lettrines at the beginning of every paragraph to simulate the old master’s typesetting.
 
-# Usage
+# Purpose
 
-# How to Compile
+This package should help you (and in the first place, me) to typeset beatiful book in the style of incunabula. This package provides an easy interface to set big initials at the beginning of every paragraph.
+
+## Usage
+
+Compile the document saying
+
+    xelatex mindmap.tex
+
+and read the created pdf. (Or read the dtx itself, if you’re used to the code.)
 
 # Licence
 
