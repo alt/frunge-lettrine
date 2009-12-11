@@ -10,7 +10,7 @@ This package should help you (and in the first place, me) to typeset beatiful bo
 
 Compile the document saying
 
-    xelatex mindmap.tex
+    xelatex frunge-lettrine.dtx
 
 and read the created pdf. (Or read the dtx itself, if you’re used to the code.)
 
