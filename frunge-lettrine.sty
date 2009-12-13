@@ -20,13 +20,11 @@
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
 \newboolean{frlet@oldpaper}
-\newboolean{frlet@foliation}
 
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
 \setboolean{frlet@oldpaper}{false}
-\setboolean{frlet@foliation}{false}
 
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
@@ -52,28 +50,24 @@
 \DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
-\DeclareOptionX{foliation}{\setboolean{frlet@foliation}{true}}
 \ProcessOptionsX
 \ifthenelse{\boolean{frlet@disable}}{\endinput}{}%
-\ifthenelse{\boolean{frlet@foliation}}
-  {%
-    \newcounter{frlet@sheet}
-    \RequirePackage{scrpage2}
-    \pagestyle{scrheadings}
-    \automark[subsection]{section}
-    \ofoot{}
-    \lehead{\llap{\thefrlet@sheet\textsuperscript{v}\hspace*{4em}}}
-    \rohead{\stepcounter{frlet@sheet}\rlap{\hspace*{4em}\thefrlet@sheet\textsuperscript{r}}}
-  }
-  {}
-
 \DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
-
 \RequirePackage{
   lettrine,
   ulem
 }
 
+\newcommand\foliationfoot[3][]{\def\frlet@foliate@pos{foot}\frlet@foliate{#2}{#3}{#1}}
+\newcommand\foliationhead[3][]{\def\frlet@foliate@pos{head}\frlet@foliate{#2}{#3}{#1}}
+\def\frlet@foliate#1#2#3{%
+  \newcounter{frlet@sheet}
+  \RequirePackage{scrpage2}
+  \pagestyle{scrheadings}
+  \ofoot{}
+  \csname le\frlet@foliate@pos\endcsname{\raisebox{#1}{\kern-#2 #3\thefrlet@sheet\textsuperscript{v}}}
+  \csname ro\frlet@foliate@pos\endcsname{\raisebox{#1}{\stepcounter{frlet@sheet} #3\thefrlet@sheet\textsuperscript{r}}\kern-#2}
+}
 \def\frlet@capital{\frlet@c@pital}
 \def\frlet@c@pital#1#2{%
   \setcounter{DefaultLines}{\frlet@lines}%

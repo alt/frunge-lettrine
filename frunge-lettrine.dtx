@@ -51,17 +51,18 @@ Do not distribute a modified version of this file under the same name.
 \begin{document}
 \maketitle
 \begin{abstract}
-This is the documentation of the package |frunge-lettrine|. It aims to offer a simple way to use beautiful lettrine at the beginning of every paragraph. Also, a thin line can be set under each line of types to simulate the old handwritings and very early printings.
+This is the documentation of the package |frunge-lettrine|. It aims to offer a simple way to use beautiful, multicolored initials at the beginning of every paragraph. These initials are taken from different OpenType fonts, one of them providing the letter itself, and others providing the ornaments. Also, a thin line can be set under each line of types to simulate the old handwritings and very early printings.
 
 Based on the frunge project, it will take some time to be really usefull. If you want to contribute to frunge, just google it and mail to the projet mailing list ;)
 \end{abstract}
 \tableofcontents
 \section{Usage}
-There is not much to say about using the package: just load it with
+\label{sec:usage}
+Load the package by saying
 \begin{verbatim}
 \usepackage[options]{frunge-lettrine}
 \end{verbatim}
-where \verb|options| are:
+in the preamble, where \verb|options| are:
 
 \subsection{Package Options}
 \let\olditem\item
@@ -91,15 +92,13 @@ where \verb|options| are:
 \end{description}
 
 \subsection{Macro Commands}
-\def\item[#1]{\olditem[\color{deepblue}\textbackslash #1]}
+\def\item[#1]{\olditem[\color{deepblue}\textbackslash #1]\ \newline}
 \begin{description}
 \item[setfrlet] All of the key-value type package options (like |random|, |font| …) can be changed at every place in the document by |\setfrlet|, e.\,g. |\setfrlet{lines}{4}| will cause the lettrines to take 4 instead of 2 lines at the next occurance.
-\end{description}
-
-There are two more macros:
-\begin{description}
 \item[disablefrlet] Disable the lettrination
 \item[enablefrlet] Re-enable lettrination. See line \ref{sec:disableenable} for further details
+\item[foliatehead/foot] These macros will add foliation to your document. In old tomes, not the pages were count, but the folios. Say |\foliatehead[f.\,]{-1.5cm}{2cm}| \emph{in the preamble} to get the foliation at 1.5cm \emph{below} the position of the pagehead and 2cm outside of the text. The optional argument will be set in front of the number, e.\,g. f.\,26\textsuperscript{r}.
+\\ |\foliatefoot[f.\,]{1.5cm}{2cm}| is analogous.
 \end{description}
 
 \section{Thanks}
@@ -120,13 +119,11 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
 \newboolean{frlet@oldpaper}
-\newboolean{frlet@foliation}
 
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
 \setboolean{frlet@oldpaper}{false}
-\setboolean{frlet@foliation}{false}
 
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
@@ -156,26 +153,14 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
-\DeclareOptionX{foliation}{\setboolean{frlet@foliation}{true}}
 \ProcessOptionsX
 % \end{macrocode}
 % If |disable| is given, the package will stop loading right here:
 % \begin{macrocode}
 \ifthenelse{\boolean{frlet@disable}}{\endinput}{}%
-\ifthenelse{\boolean{frlet@foliation}}
-  {%
-    \newcounter{frlet@sheet}
-    \RequirePackage{scrpage2}
-    \pagestyle{scrheadings}
-    \automark[subsection]{section}
-    \ofoot{}
-    \lehead{\llap{\thefrlet@sheet\textsuperscript{v}\hspace*{4em}}}
-    \rohead{\stepcounter{frlet@sheet}\rlap{\hspace*{4em}\thefrlet@sheet\textsuperscript{r}}}
-  }
-  {}
-
+%
 \DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
-
+%
 % \end{macrocode}
 % Load the needed packages; lettrine for the capitals, ulem for the thin line.
 % \begin{macrocode}
@@ -185,6 +170,26 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 }
 
 % \end{macrocode}
+% \subsection{Page Layout}
+% \subsubsection{Foliation}
+% This will add the foliation. It’s not a very smart way, but the page header/footer is used for this, as it offers a very easy hook. But then the head/foot cannot be used for something else.
+% \begin{macro}{foliatefoot/head} Therefore, both macros are offered. You still can set every single element of the page/foot via the usual commands for |scrpage2|. If you \emph{really} need both inner/outer head and foot for something else but foliation … maybe you shoud re-think your page layout …
+% 
+% The first two macros are user-level wrapper for the third one.
+% \begin{macrocode}
+\newcommand\foliationfoot[3][]{\def\frlet@foliate@pos{foot}\frlet@foliate{#2}{#3}{#1}}
+\newcommand\foliationhead[3][]{\def\frlet@foliate@pos{head}\frlet@foliate{#2}{#3}{#1}}
+% 
+\def\frlet@foliate#1#2#3{%
+  \newcounter{frlet@sheet}
+  \RequirePackage{scrpage2}
+  \pagestyle{scrheadings}
+  \ofoot{}
+  \csname le\frlet@foliate@pos\endcsname{\raisebox{#1}{\kern-#2 #3\thefrlet@sheet\textsuperscript{v}}}
+  \csname ro\frlet@foliate@pos\endcsname{\raisebox{#1}{\stepcounter{frlet@sheet} #3\thefrlet@sheet\textsuperscript{r}}\kern-#2}
+}
+% \end{macrocode}
+% \end{macro}
 % \subsection{Capitals}
 %\begin{macro} We want to modify |\lettrine| a bit, so we define a wrapper macro. The hooks |\frlet@before| and |\frlet@after| are used to implement additional code.
 % \begin{macrocode}
@@ -289,7 +294,6 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \item[colors] It might be nice to use three or four colors for every lettrine. So three or four ornaments must be used. Should not be a big problem to implement, but a great problem for a font designer …
 % \item[default font] Just an implementation thing: use a default font if none is given.
 % \item[variable ornament font] Should not just be |font_ornaments| but anything. This could actually get quite nice using totally different fonts …
-% \item[foliation] Instead of page numbers, early books counted the sheets. This was done like f.26\textsuperscript{r} for the 26\textsuperscript{th} sheet, \emph{recto}, i.\,e. frontside. (f.26\textsuperscript{v} for \emph{verso}, backside). There could be a package option to implement this using the classes and packages from koma-bundle.
 % \end{description}
 % \Finale
 % \endinput

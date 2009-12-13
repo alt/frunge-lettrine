@@ -1,10 +1,14 @@
 # frunge-lettrine
 
-A LaTeX documentclass to insert lettrines at the beginning of every paragraph to simulate the old master’s typesetting.
+A LaTeX document class to insert initials at the beginning of every paragraph to simulate the old master’s typesetting.
 
 # Purpose
 
-This package should help you (and in the first place, me) to typeset beatiful book in the style of incunabula. This package provides an easy interface to set big initials at the beginning of every paragraph.
+This package should help you (and in the first place, me) to typeset beatiful books in the style of the old incunabula. The main features are: Multicolored initials at every paragraph and thin lines under each row (as in old handwritings). 
+
+### Why this package?
+
+As there is the great package lettrine by Daniel Flipo, you may wonder what this package is good for. With the lettrine package, it is not trivial to typeset multicolored initials. Also, you have to change the font manually if you want another one in the initial and so on. This package does all this work for you.
 
 ## Usage
 
@@ -12,7 +16,7 @@ Compile the document saying
 
     xelatex frunge-lettrine.dtx
 
-and read the created pdf. (Or read the dtx itself, if you’re used to the code.)
+and read the created pdf as documentation. (Or read the dtx itself, if you’re used to the code.)
 
 # Licence
 
