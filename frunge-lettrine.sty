@@ -108,6 +108,10 @@
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
+  \let\oldmathbegin\[
+  \def\[{\disablefrlet\oldmathbegin}
+  \let\oldmathend\]
+  \def\]{\oldmathend\enablefrlet}
   \ifthenelse{\boolean{frlet@oldpaper}}{\pagecolor[rgb]{0.956 0.743 0.496}}{}
 }
 \def\disablefrlet{\def\frlet@capital{}}

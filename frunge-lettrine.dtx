@@ -27,8 +27,9 @@ Do not distribute a modified version of this file under the same name.
 \else
   \expandafter\endgroup
 \fi
-\ProvidesFile{frunge-lettrine.sty}
-  [05.12.2009 v0.d using lettrine to produce beautiful frunge-based documents]
+\def\mypackageversion{15.12.2009 v0.d2-1}
+\ProvidesFile{frunge-lettrine.sty}%
+  [\mypackageversion using lettrine to produce beautiful frunge-based documents]
 \documentclass{gmdocc}
 \usepackage{
   hyperref,
@@ -46,6 +47,7 @@ Do not distribute a modified version of this file under the same name.
 
 \title{|frunge-lettrine|}
 \author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
+\date{\mypackageversion}
 \def\marginpartt{\scriptsize\ttfamily}
 
 \begin{document}
@@ -246,6 +248,15 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
 % \end{macrocode}
+% Mathmode would kill the document as it uses paragraphs as well. So frlet must be escaped which is done bye the following code. This might cause problems as the definition of |\[| might change inside the document. If this happens to you, please contact me!
+% 
+% Usage of \TeX s |$$| is not possible. If you need it, you manually have to |\disablefrlet|.
+% \begin{macrocode}
+  \let\oldmathbegin\[
+  \def\[{\disablefrlet\oldmathbegin}
+  \let\oldmathend\]
+  \def\]{\oldmathend\enablefrlet}
+% \end{macrocode}
 % The imitation of old paper will be activated at begin document, too:
 % \begin{macrocode}
   \ifthenelse{\boolean{frlet@oldpaper}}{\pagecolor[rgb]{0.956 0.743 0.496}}{}
@@ -259,7 +270,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \end{macrocode}
 % \subsection{Thin Line}
 % \label{thinline}
-% Beware! This is a very dangerous thing. Even a footnote will break your document when using thin lines! Don’t write anything eles than plain text when using this. (floats are ok, though) Good values for the thickness are below |0.1pt|, so say e.\,g. |thinline=0.05pt|.
+% Beware! This is a quite dangerous thing. Even a footnote will break your document when using thin lines! Don’t write anything else than plain text when using this. (At least inside a paragraph. Floats are ok as well as display maths (not underlined) and inline math (underlined)) Good values for the thickness are below |0.1pt|, so say e.\,g. |thinline=0.05pt|.
 % 
 % To typeset this fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I don’t have to say ”thin line“ all the time …} under each row, we use the package ulem, change the behaviour a little bit and use it in the |\frlet@after|-hook. Now, the |\uline| macro should take the whole paragraph as argument, but I didn’t manage to get the grouping right. So if you use this feature, you have to write a |{| between the second and third token (letter) of your paragraph and a |}| at the very end of it. I hope this bug will soon change …
 % \begin{macrocode}
@@ -294,6 +305,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \item[colors] It might be nice to use three or four colors for every lettrine. So three or four ornaments must be used. Should not be a big problem to implement, but a great problem for a font designer …
 % \item[default font] Just an implementation thing: use a default font if none is given.
 % \item[variable ornament font] Should not just be |font_ornaments| but anything. This could actually get quite nice using totally different fonts …
+% \item[math] Display math must be escaped – use |\disablefrlet| and |\enablefrlet| up to now.
 % \end{description}
 % \Finale
 % \endinput
