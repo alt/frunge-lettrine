@@ -76,12 +76,12 @@
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
-          \fontspec{\frlet@font_ornaments1}\color{\frlet@ornamentcolor}%
-            \kern\frlet@kern@ornament%
-            \raisebox{\frlet@raise@ornament}{#1}%
+          \frlet@ornamentfont \color{\frlet@ornamentcolor}%
+          \kern\frlet@kern@ornament%
+          \raisebox{\frlet@raise@ornament}{#1}%
         }%
       \fi
-        \fontspec{\frlet@font}\color{\frlet@maincolor}#1}%
+        \frlet@mainfont\color{\frlet@maincolor}#1}%
       {}%
   \iffrlet@draft
     #2\unskip

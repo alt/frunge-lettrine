@@ -27,7 +27,7 @@ Do not distribute a modified version of this file under the same name.
 \else
   \expandafter\endgroup
 \fi
-\def\mypackageversion{15.12.2009 v0.d2-1}
+\def\mypackageversion{16.12.2009 v0.e}
 \ProvidesFile{frunge-lettrine.sty}%
   [\mypackageversion using lettrine to produce beautiful frunge-based documents]
 \documentclass{gmdocc}
@@ -64,7 +64,14 @@ Load the package by saying
 \begin{verbatim}
 \usepackage[options]{frunge-lettrine}
 \end{verbatim}
-in the preamble, where \verb|options| are:
+in the preamble. To use a font for the initial letter, say
+\begin{verbatim}
+\setfrlet{mainfont}{\fontspec{FloralCapsLettrine}}
+\setfrlet{ornamentfont}{\fontspec{FloralCapsLettrine_ornaments1}}
+\end{verbatim}
+in the preamble. The two font elements can be chosen independently and can contain anything. \footnote{Writing text in here would cause that text to appear at every paragraph. But that is \emph{not} the right usage of this package.} Nevertheless, you should constrain yourself to font-related commands, like |\fontspec|. |\normalfont| is possible, too, etc.
+
+Future relaeses might be capable to handle several ornament fonts; this is not possible so far!
 
 \subsection{Package Options}
 \let\olditem\item
@@ -78,9 +85,8 @@ in the preamble, where \verb|options| are:
 \end{description}
 
 \subsubsection{Fonts}
+The main font and the ornament font must be given via macro, see below.
 \begin{description}
-\item[font =] Must be given! Chooses the font the initials are taken from. The ornaments should be taken from |font_ornaments|.
-(There is no such font so far, if you want to provide one or want to see an example, feel free to contact me!)
 \item[maincolor =] sets the main color of the lettrines (mostly black)
 \item[ornamentcolor =] color used for the ornaments (e.\,g. red)
 \item[random=]  (not yet implemented) choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
@@ -203,12 +209,12 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
-          \fontspec{\frlet@font_ornaments1}\color{\frlet@ornamentcolor}%
-            \kern\frlet@kern@ornament%
-            \raisebox{\frlet@raise@ornament}{#1}%
+          \frlet@ornamentfont \color{\frlet@ornamentcolor}%
+          \kern\frlet@kern@ornament%
+          \raisebox{\frlet@raise@ornament}{#1}%
         }%
       \fi
-        \fontspec{\frlet@font}\color{\frlet@maincolor}#1}%
+        \frlet@mainfont\color{\frlet@maincolor}#1}%
       {}%
 % \end{macrocode}
 % If the |draft| option is given, no ornaments and thin lines should be printed.
@@ -290,8 +296,9 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 %   line=.05pt,
 %   maincolor=black,
 %   ornamentcolor=red,
-%   font={FloralCapsLettrine}
 % ]{frunge-lettrine}
+% \setfrlet{mainfont}{\fontspec{FloralCapsLettrine}}
+% \setfrlet{ornamentfont}{\fontspec{FloralCapsLettrine_ornaments1}}
 % \begin{document}
 % Th{is is a first paragraph to test this package.}
 % 
@@ -305,7 +312,6 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \item[colors] It might be nice to use three or four colors for every lettrine. So three or four ornaments must be used. Should not be a big problem to implement, but a great problem for a font designer …
 % \item[default font] Just an implementation thing: use a default font if none is given.
 % \item[variable ornament font] Should not just be |font_ornaments| but anything. This could actually get quite nice using totally different fonts …
-% \item[math] Display math must be escaped – use |\disablefrlet| and |\enablefrlet| up to now.
 % \end{description}
 % \Finale
 % \endinput
