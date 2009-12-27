@@ -64,7 +64,7 @@ Load the package by saying
 \begin{verbatim}
 \usepackage[options]{frunge-lettrine}
 \end{verbatim}
-in the preamble. To use a font for the initial letter, say
+in the preamble. To use a font for the initial letter, say for example
 \begin{verbatim}
 \setfrlet{mainfont}{\fontspec{FloralCapsLettrine}}
 \setfrlet{ornamentfont}{\fontspec{FloralCapsLettrine_ornaments1}}
@@ -85,16 +85,16 @@ Future relaeses might be capable to handle several ornament fonts; this is not p
 \end{description}
 
 \subsubsection{Fonts}
-The main font and the ornament font must be given via macro, see below.
+The main font and the ornament font must be given via macro, see |\setfrlet| below.
 \begin{description}
 \item[maincolor =] sets the main color of the lettrines (mostly black)
 \item[ornamentcolor =] color used for the ornaments (e.\,g. red)
 \item[random=]  (not yet implemented) choose a ”randomization“ to get different glyphs in the text (shouldn’t look boring, should it?)
+\item[lines=] Sets the number of lines for the lettrines (default is 2)
 \end{description}
 
 \subsubsection{Thin Line}
 \begin{description}
-\item[lines=] Sets the number of lines for the lettrines (default is 2)
 \item[thinline=] Enables the thin line under letters and sets the thickness to the given amount. See line \ref{thinline} below.
 \item[depth=] Sets the depth of this thin line. Defaults to |depth=0pt|.
 \end{description}
@@ -102,7 +102,7 @@ The main font and the ornament font must be given via macro, see below.
 \subsection{Macro Commands}
 \def\item[#1]{\olditem[\color{deepblue}\textbackslash #1]\ \newline}
 \begin{description}
-\item[setfrlet] All of the key-value type package options (like |random|, |font| …) can be changed at every place in the document by |\setfrlet|, e.\,g. |\setfrlet{lines}{4}| will cause the lettrines to take 4 instead of 2 lines at the next occurance.
+\item[setfrlet] All of the key-value type package options (like |random|, |font| …) can be changed at every place in the document by |\setfrlet|, e.\,g. |\setfrlet{lines}{4}| will cause the lettrines to take 4 instead of 2 lines at the next occurance. |\setfrlet{mainfont}{...}| will change the font used for the initials.
 \item[disablefrlet] Disable the lettrination
 \item[enablefrlet] Re-enable lettrination. See line \ref{sec:disableenable} for further details
 \item[foliatehead/foot] These macros will add foliation to your document. In old tomes, not the pages were count, but the folios. Say |\foliatehead[f.\,]{-1.5cm}{2cm}| \emph{in the preamble} to get the foliation at 1.5cm \emph{below} the position of the pagehead and 2cm outside of the text. The optional argument will be set in front of the number, e.\,g. f.\,26\textsuperscript{r}.
@@ -119,7 +119,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 %
 %<*package>
 % \fi
-% First, definition of the package options and processing by |xkeyval|:
+% First, initialization of the booleans and default values:
 % \begin{macrocode}
 \RequirePackage{ifthen}
 \newboolean{frlet@disable}
@@ -127,12 +127,12 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
 \newboolean{frlet@oldpaper}
-
+%
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
 \setboolean{frlet@oldpaper}{false}
-
+% Default values of other parameters:
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
 \def\frlet@thinline{.1pt}
@@ -140,25 +140,25 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \def\frlet@kern@ornament{-.2em}
 \def\frlet@raise@ornament{.2ex}
 \def\frlet@depth{0pt}
-%
+% 
+% Definition of the package options and processing by |xkeyval| and evaluation:
 \RequirePackage{xkeyval}
-\DeclareOptionX{thinline}{%
-  \setboolean{frlet@printthinline}{true}%
-  \def\frlet@thinline{#1}%
-}
-%
+% General options:
+\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
+\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
+% Font-dependent options:
 \DeclareOptionX{font}{\def\frlet@font{#1}}
 \DeclareOptionX{maincolor}{\def\frlet@maincolor{#1}}
 \DeclareOptionX{ornamentnumber}{\def\frlet@ornamentnumber{#1}}
 \DeclareOptionX{ornamentcolor}{\def\frlet@ornamentcolor{#1}}
 \DeclareOptionX{ornamentcolor2}{\expandafter\def\csname\frlet@ornamentcolor2\endcsname{#1}}
 \DeclareOptionX{random}{\def\frlet@random{#1}}
-%
+% Options regarding the layout of the capitals:
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \DeclareOptionX{depth}{\def\frlet@depth{#1}}
-%
-\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
-\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
+% Set the thin line or don’t:
+\DeclareOptionX{thinline}{\setboolean{frlet@printthinline}{true}\def\frlet@thinline{#1}}
+% More general layout:
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
 \ProcessOptionsX
@@ -168,13 +168,17 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \ifthenelse{\boolean{frlet@disable}}{\endinput}{}%
 %
 \DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
+\DeclareRobustCommand\setfrletbool[2]{\setboolean{frlet@#1}{#2}}
+\setfrlet{mainfont}{\normalfont}
+\setfrlet{ornamentfont}{\itshape}
 %
 % \end{macrocode}
 % Load the needed packages; lettrine for the capitals, ulem for the thin line.
 % \begin{macrocode}
 \RequirePackage{
   lettrine,
-  ulem
+  ulem,
+  xcolor
 }
 
 % \end{macrocode}
@@ -222,7 +226,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \iffrlet@draft
     #2\unskip
   \else
-    \MakeUppercase{\uline{#2}}%
+    \MakeUppercase{\iffrlet@printthinline\uline{#2}\fi}%
   \fi
   \frlet@after%
 }
@@ -310,8 +314,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \begin{description}
 % \def\item[#1]{\olditem[\color{deepblue}#1]\ \newline }
 % \item[colors] It might be nice to use three or four colors for every lettrine. So three or four ornaments must be used. Should not be a big problem to implement, but a great problem for a font designer …
-% \item[default font] Just an implementation thing: use a default font if none is given.
-% \item[variable ornament font] Should not just be |font_ornaments| but anything. This could actually get quite nice using totally different fonts …
+% \item[underlining] The underlining is very problematic so far. Maybe the soul package coul be used here – but would need some changes!
 % \end{description}
 % \Finale
 % \endinput

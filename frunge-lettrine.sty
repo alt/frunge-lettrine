@@ -20,12 +20,10 @@
 \newboolean{frlet@draft}
 \newboolean{frlet@rubricate}
 \newboolean{frlet@oldpaper}
-
 \setboolean{frlet@disable}{false}
 \setboolean{frlet@printthinline}{false}
 \setboolean{frlet@draft}{false}
 \setboolean{frlet@oldpaper}{false}
-
 \def\frlet@maincolor{black}
 \def\frlet@ornamentcolor{red}
 \def\frlet@thinline{.1pt}
@@ -34,10 +32,8 @@
 \def\frlet@raise@ornament{.2ex}
 \def\frlet@depth{0pt}
 \RequirePackage{xkeyval}
-\DeclareOptionX{thinline}{%
-  \setboolean{frlet@printthinline}{true}%
-  \def\frlet@thinline{#1}%
-}
+\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
+\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
 \DeclareOptionX{font}{\def\frlet@font{#1}}
 \DeclareOptionX{maincolor}{\def\frlet@maincolor{#1}}
 \DeclareOptionX{ornamentnumber}{\def\frlet@ornamentnumber{#1}}
@@ -46,16 +42,19 @@
 \DeclareOptionX{random}{\def\frlet@random{#1}}
 \DeclareOptionX{lines}{\def\frlet@lines{#1}}
 \DeclareOptionX{depth}{\def\frlet@depth{#1}}
-\DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
-\DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
+\DeclareOptionX{thinline}{\setboolean{frlet@printthinline}{true}\def\frlet@thinline{#1}}
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
 \ProcessOptionsX
 \ifthenelse{\boolean{frlet@disable}}{\endinput}{}%
 \DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
+\DeclareRobustCommand\setfrletbool[2]{\setboolean{frlet@#1}{#2}}
+\setfrlet{mainfont}{\normalfont}
+\setfrlet{ornamentfont}{\itshape}
 \RequirePackage{
   lettrine,
-  ulem
+  ulem,
+  xcolor
 }
 
 \newcommand\foliationfoot[3][]{\def\frlet@foliate@pos{foot}\frlet@foliate{#2}{#3}{#1}}
@@ -86,7 +85,7 @@
   \iffrlet@draft
     #2\unskip
   \else
-    \MakeUppercase{\uline{#2}}%
+    \MakeUppercase{\iffrlet@printthinline\uline{#2}\fi}%
   \fi
   \frlet@after%
 }
