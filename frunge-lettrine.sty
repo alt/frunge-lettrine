@@ -58,7 +58,7 @@
 \setfrlet{ornamentfont}{\itshape}
 \RequirePackage{
   lettrine,
-  mylineno,
+  lineno,
   xcolor
 }
 \newcommand\foliationfoot[3][]{\def\frlet@foliate@pos{foot}\frlet@foliate{#2}{#3}{#1}}
@@ -91,11 +91,14 @@
   \iffrlet@draft
     #2\unskip
   \else
-    \hbox to 0cm{\line(1,0){110}}%
+\setlength{\unitlength}{1\baselineskip}
+\begin{picture}(0,0)%
+\multiput(0,0)(0,-1){\theDefaultLines}{\line(1,0){7.3}}%
+\end{picture}%
     \MakeUppercase{#2}%
-  \let\thelinenumber\frlet@line %% and activate the line again
-  \setcounter{frlet@linessincepar}{0}
-  \fi
+    \let\thelinenumber\frlet@line %% and activate the line again
+    \setcounter{frlet@linessincepar}{0}%
+  \fi%
   \frlet@after%
 }
 \def\frlet@after{}%
@@ -106,7 +109,8 @@
     \stepcounter{frlet@linessincepar}
   \else
     \color{gray}
-    \line(1,0){160}
+\setlength{\unitlength}{1\columnwidth}
+    \line(1,0){1}
     \kern-\columnwidth\kern-1.8em
   \fi
 }

@@ -4,11 +4,11 @@ A LaTeX document class to insert initials at the beginning of every paragraph to
 
 # Purpose
 
-This package should help you (and in the first place, me) to typeset beatiful books in the style of the old incunabula. The main features are: Multicolored initials at every paragraph and thin lines under each row (as in old handwritings). 
+This package should help you (and in the first place, me) to typeset beatiful books in the style of the old incunabula. The main features are: Multicolored initials at every paragraph and thin lines under each line (as in old handwritings and incunabula).
 
 ### Why this package?
 
-As there is the great package lettrine by Daniel Flipo, you may wonder what this package is good for. With the lettrine package, it is not trivial to typeset multicolored initials. Also, you have to change the font manually if you want another one in the initial and so on. This package does all this work for you.
+frunge-lettrine is a wrapper for the great package lettrine by Daniel Flipo. The main purpose is the automatication to insert an initial at every paragraph. Further, it makes possible multiple colors for the initials. Last (but not least!) it inserts thin lines.
 
 ## Usage
 
@@ -24,4 +24,4 @@ This work may be distributed and/or modified under the conditions of the LaTeX P
 
 This work has the LPPL maintenance status “*maintained*” and the Current Maintainer of this work is Arno Trautmann.
 
-This work consists of the file frunge-lettrine.dtx.
+This work consists of the file frunge-lettrine.dtx and derived files frunge-lettrine.sty and frunge-lettrine.pdf.

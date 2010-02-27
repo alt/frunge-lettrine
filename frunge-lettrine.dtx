@@ -28,7 +28,7 @@ Do not distribute a modified version of this file under the same name.
   \expandafter\endgroup
 \fi
 \listfiles
-\def\frletpackageversion{27.\,02.\,2010 v0.f.b}
+\def\frletpackageversion{27.\,02.\,2010 v0.f.c}
 \ProvidesFile{frunge-lettrine.sty}%
   [\frletpackageversion\ using lettrine to produce beautiful frunge-based documents]
 \documentclass{gmdocc}
@@ -193,7 +193,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \begin{macrocode}
 \RequirePackage{
   lettrine,
-  mylineno,
+  lineno,
   xcolor
 }
 % \end{macrocode}
@@ -243,11 +243,14 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \iffrlet@draft
     #2\unskip
   \else
-    \hbox to 0cm{\line(1,0){110}}%
+\setlength{\unitlength}{1\baselineskip}
+\begin{picture}(0,0)%
+\multiput(0,0)(0,-1){\theDefaultLines}{\line(1,0){7.3}}%
+\end{picture}%
     \MakeUppercase{#2}%
-  \let\thelinenumber\frlet@line %% and activate the line again
-  \setcounter{frlet@linessincepar}{0}
-  \fi
+    \let\thelinenumber\frlet@line %% and activate the line again
+    \setcounter{frlet@linessincepar}{0}%
+  \fi%
   \frlet@after%
 }
 \def\frlet@after{}%
@@ -258,7 +261,8 @@ This package would be useless without the wonderfull lettrine package by Daniel 
     \stepcounter{frlet@linessincepar}
   \else
     \color{gray}
-    \line(1,0){160}
+\setlength{\unitlength}{1\columnwidth}
+    \line(1,0){1}
     \kern-\columnwidth\kern-1.8em
   \fi
 }
