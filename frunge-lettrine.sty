@@ -31,6 +31,8 @@
 \def\frlet@kern@ornament{-.2em}
 \def\frlet@raise@ornament{.2ex}
 \def\frlet@depth{0pt}
+
+\newcounter{frlet@linessincepar}
 \RequirePackage{xkeyval}
 \DeclareOptionX{disable}{\setboolean{frlet@disable}{true}}
 \DeclareOptionX{draft}{\setboolean{frlet@draft}{true}}
@@ -70,6 +72,7 @@
   \csname ro\frlet@foliate@pos\endcsname{\raisebox{#1}{\stepcounter{frlet@sheet} #3\thefrlet@sheet\textsuperscript{r}}\kern-#2}
 }
 \def\frlet@capital{\frlet@c@pital}
+%%
 \def\frlet@c@pital#1#2{%
   \setcounter{DefaultLines}{\frlet@lines}%
   \vspace{-\the\skip12}  %% this is baselineskip!
@@ -88,8 +91,10 @@
   \iffrlet@draft
     #2\unskip
   \else
+    \hbox to 0cm{\line(1,0){110}}%
     \MakeUppercase{#2}%
   \let\thelinenumber\frlet@line %% and activate the line again
+  \setcounter{frlet@linessincepar}{0}
   \fi
   \frlet@after%
 }
@@ -97,9 +102,13 @@
 \def\frlet@before{}%
 
 \def\frlet@line{
-  \color{gray}
-  \line(1,0){160}
-  \kern-\columnwidth\kern-1.8em
+  \ifnum \thefrlet@linessincepar < \theDefaultLines
+    \stepcounter{frlet@linessincepar}
+  \else
+    \color{gray}
+    \line(1,0){160}
+    \kern-\columnwidth\kern-1.8em
+  \fi
 }
 
 \newcommand{\raiseornament}[1]{\def\frlet@raise@ornament{#1}}
