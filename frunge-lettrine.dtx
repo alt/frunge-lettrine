@@ -27,9 +27,10 @@ Do not distribute a modified version of this file under the same name.
 \else
   \expandafter\endgroup
 \fi
-\def\mypackageversion{16.12.2009 v0.e}
+\listfiles
+\def\frletpackageversion{27.\,02.\,2010 v0.f.a}
 \ProvidesFile{frunge-lettrine.sty}%
-  [\mypackageversion using lettrine to produce beautiful frunge-based documents]
+  [\frletpackageversion using lettrine to produce beautiful frunge-based documents]
 \documentclass{gmdocc}
 \usepackage{
   hyperref,
@@ -45,9 +46,19 @@ Do not distribute a modified version of this file under the same name.
 \setmainlanguage{english}
 \setmainfont{TeX Gyre Pagella}
 
+% % % 
+% ATTENTION!
+% % %
+% This def has to be made because at any place this macro is called but nowhere def’d.
+% No idea what’s going on here, seems to be a gmdocc-problem
+\def\Gm@checkbool#1{}
+% % % 
+% ATTENTION!
+% % %
+
 \title{|frunge-lettrine|}
 \author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
-\date{\mypackageversion}
+\date{\frletpackageversion}
 \def\marginpartt{\scriptsize\ttfamily}
 
 \begin{document}
@@ -163,9 +174,12 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
 \ProcessOptionsX
 % \end{macrocode}
-% If |disable| is given, the package will stop loading right here:
+% If |disable| is given, the package will define |\setfrlet|, |\setfrletbool| and |\foliationhead| to dummy macros so no error will be raised when testing. Then loading is stopped:
 % \begin{macrocode}
-\ifthenelse{\boolean{frlet@disable}}{\endinput}{}%
+\ifthenelse{
+	\boolean{frlet@disable}}
+	{\newcommand\foliationhead[3][]{}\newcommand\setfrlet[2]{}\newcommand\setfrletbool[2]{}
+	\endinput}{}%
 %
 \DeclareRobustCommand\setfrlet[2]{\expandafter\def\csname frlet@#1\endcsname{#2}}
 \DeclareRobustCommand\setfrletbool[2]{\setboolean{frlet@#1}{#2}}
@@ -173,14 +187,13 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \setfrlet{ornamentfont}{\itshape}
 %
 % \end{macrocode}
-% Load the needed packages; lettrine for the capitals, ulem for the thin line.
+% Load the needed packages; lettrine for the capitals, linen for the thin line.
 % \begin{macrocode}
 \RequirePackage{
   lettrine,
-  ulem,
+  mylineno,
   xcolor
 }
-
 % \end{macrocode}
 % \subsection{Page Layout}
 % \subsubsection{Foliation}
@@ -210,6 +223,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \setcounter{DefaultLines}{\frlet@lines}%
   \vspace{-\the\skip12}  %% this is baselineskip!
   \frlet@before%
+  \let\thelinenumber\relax  %% needed to prevent an additional, unwanted line
   \lettrine{%
       \iffrlet@draft\else
         \hbox to 0cm{%
@@ -226,12 +240,21 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \iffrlet@draft
     #2\unskip
   \else
-    \MakeUppercase{\iffrlet@printthinline\uline{#2}\fi}%
+    \MakeUppercase{#2}%
+  \let\thelinenumber\frlet@line %% and activate the line again
   \fi
   \frlet@after%
 }
 \def\frlet@after{}%
 \def\frlet@before{}%
+
+\def\frlet@line{
+  \color{gray}
+  \line(1,0){160}
+  \kern-\columnwidth\kern-1.8em
+}
+
+
 % \end{macrocode}
 % \end{macro}
 % \begin{macrocode}
@@ -280,15 +303,17 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \end{macrocode}
 % \subsection{Thin Line}
 % \label{thinline}
-% Beware! This is a quite dangerous thing. Even a footnote will break your document when using thin lines! Don’t write anything else than plain text when using this. (At least inside a paragraph. Floats are ok as well as display maths (not underlined) and inline math (underlined)) Good values for the thickness are below |0.1pt|, so say e.\,g. |thinline=0.05pt|.
-% 
-% To typeset this fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I don’t have to say ”thin line“ all the time …} under each row, we use the package ulem, change the behaviour a little bit and use it in the |\frlet@after|-hook. Now, the |\uline| macro should take the whole paragraph as argument, but I didn’t manage to get the grouping right. So if you use this feature, you have to write a |{| between the second and third token (letter) of your paragraph and a |}| at the very end of it. I hope this bug will soon change …
+% Typesetting this fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I can call it by name …} is at the moment implemented by hacking the lineno-package and substituting the line number by the thin line.
 % \begin{macrocode}
 \iffrlet@draft\else
   \iffrlet@printthinline%
-    \renewcommand{\ULthickness}{\frlet@thinline}
-    \def\ULdepth{\frlet@depth}
-    \def\frlet@after{\uline}
+    \linenumbers
+    \linethickness{0.01ex}
+    \def\thelinenumber{
+      \color{gray}
+      \line(1,0){160}
+      \kern-\columnwidth\kern-1.8em
+    }
   \fi
 \fi
 % \end{macrocode}
