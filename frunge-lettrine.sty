@@ -5,14 +5,12 @@
 %% The original source files were:
 %%
 %% frunge-lettrine.dtx  (with options: `package')
-%% 
 %% EXPERIMENTAL CODE
 %% 
 %% Do not distribute this file without also distributing the
 %% source files specified above.
 %% 
 %% Do not distribute a modified version of this file under the same name.
-%% 
 %% File: frunge-lettrine.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
 \RequirePackage{ifthen}
 \newboolean{frlet@disable}
@@ -57,6 +55,7 @@
 \setfrlet{mainfont}{\normalfont}
 \setfrlet{ornamentfont}{\itshape}
 \RequirePackage{
+  expl3,
   lettrine,
   lineno,
   xcolor
@@ -71,50 +70,65 @@
   \csname le\frlet@foliate@pos\endcsname{\raisebox{#1}{\kern-#2 #3\thefrlet@sheet\textsuperscript{v}}}
   \csname ro\frlet@foliate@pos\endcsname{\raisebox{#1}{\stepcounter{frlet@sheet} #3\thefrlet@sheet\textsuperscript{r}}\kern-#2}
 }
+\ExplSyntaxOn
+\newXeTeXintercharclass\frlet@lowercase
+\newXeTeXintercharclass\frlet@uppercase
+\def\frlet@color#1{\XeTeXinterchartokenstate=0 \textcolor{red}{#1}\XeTeXinterchartokenstate=1#1}
+
+\XeTeXinterchartoks \frlet@uppercase \frlet@lowercase = {}
+\XeTeXinterchartoks 255 \frlet@uppercase = {\frlet@color}
+
+\cs_new:Npn\latin_classes:n#1{
+   \XeTeXcharclass #1 = \frlet@uppercase
+   \XeTeXcharclass \intexpr_eval:n{#1+32} = \frlet@lowercase
+}
+\prg_stepwise_function:nnnN{65}{1}{90}\latin_classes:n
+\ExplSyntaxOff
 \def\frlet@capital{\frlet@c@pital}
 %%
 \def\frlet@c@pital#1#2{%
+\XeTeXinterchartokenstate=0
   \setcounter{DefaultLines}{\frlet@lines}%
-  \vspace{-\the\skip12}  %% this is baselineskip!
+  \vspace{-\baselineskip}  %% else the first line would be too low
+  \let\makeLineNumber\relax %% and activate the line again
   \frlet@before%
-  \let\thelinenumber\relax  %% needed to prevent an additional, unwanted line
   \lettrine{%
-      \iffrlet@draft\else
-        \hbox to 0cm{%
-          \frlet@ornamentfont \color{\frlet@ornamentcolor}%
-          \kern\frlet@kern@ornament%
+    \iffrlet@draft\else%
+      \hbox to 0cm{%
+        \frlet@ornamentfont \color{\frlet@ornamentcolor}%
+        \kern\frlet@kern@ornament%
+        \vbox to 0pt{\vspace*{-\baselineskip}%
           \raisebox{\frlet@raise@ornament}{#1}%
-        }%
-      \fi
-        \frlet@mainfont\color{\frlet@maincolor}#1}%
-      {}%
+}%
+      }%
+    \fi%
+    \frlet@mainfont\color{\frlet@maincolor}#1%
+  }{}% end of lettrine
   \iffrlet@draft
     #2\unskip
   \else
 \setlength{\unitlength}{1\baselineskip}
 \begin{picture}(0,0)%
-\multiput(0,0)(0,-1){\theDefaultLines}{\line(1,0){7.3}}%
+\multiput(0,0)(0,-1){\theDefaultLines}{\hbox to 1\linewidth{\hrulefill}X}%
 \end{picture}%
     \MakeUppercase{#2}%
-    \let\thelinenumber\frlet@line %% and activate the line again
     \setcounter{frlet@linessincepar}{0}%
   \fi%
+  \let\makeLineNumber\frlet@check@line%
   \frlet@after%
+\XeTeXinterchartokenstate=1
 }
 \def\frlet@after{}%
 \def\frlet@before{}%
 
-\def\frlet@line{
+\def\frlet@check@line{
   \ifnum \thefrlet@linessincepar < \theDefaultLines
     \stepcounter{frlet@linessincepar}
   \else
-    \color{gray}
-\setlength{\unitlength}{1\columnwidth}
-    \line(1,0){1}
-    \kern-\columnwidth\kern-1.8em
+    \frlet@line  %% set the line for the first time, then switch
+    \global\let\makeLineNumber\frlet@line
   \fi
 }
-
 \newcommand{\raiseornament}[1]{\def\frlet@raise@ornament{#1}}
 \newcommand{\kernbeforelettrine}[1]{}
 \newcommand{\kernafterlettrine}[1]{}
@@ -139,17 +153,17 @@
 }
 \def\disablefrlet{\def\frlet@capital{}}
 \def\enablefrlet{\def\frlet@capital{\frlet@c@pital}\everypar\expandafter{\the\everypar\neweverypar\frlet@capital}}
+\def\frlet@line{%
+  \linethickness{0.01ex}%
+  \color{gray}%
+  \hbox to \columnwidth{\hrulefill}%
+}
 \iffrlet@draft\else
   \iffrlet@printthinline%
     \linenumbers
-    \linethickness{0.01ex}
-    \def\thelinenumber{
-      \color{gray}
-      \line(1,0){160}
-      \kern-\columnwidth\kern-1.8em
-    }
+    \let\makeLineNumber\frlet@line
   \fi
 \fi
-%% 
+\endinput
 %%
 %% End of file `frunge-lettrine.sty'.

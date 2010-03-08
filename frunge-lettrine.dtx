@@ -8,17 +8,13 @@
 \input docstrip.tex
 \askforoverwritefalse
 \preamble
-
 EXPERIMENTAL CODE
 
 Do not distribute this file without also distributing the
 source files specified above.
 
 Do not distribute a modified version of this file under the same name.
-
 \endpreamble
-\postamble
-\endpostamble
 \keepsilent
 \generate{\file{frunge-lettrine.sty}{\from{frunge-lettrine.dtx}{package}}}
 
@@ -27,10 +23,9 @@ Do not distribute a modified version of this file under the same name.
 \else
   \expandafter\endgroup
 \fi
-\listfiles
-\def\frletpackageversion{27.\,02.\,2010 v0.f.c}
+\def\packageversion{27.\,02.\,2010 v0.f.c}
 \ProvidesFile{frunge-lettrine.sty}%
-  [\frletpackageversion\ using lettrine to produce beautiful frunge-based documents]
+  [\packageversion\ using lettrine to produce beautiful frunge-based documents]
 \documentclass{gmdocc}
 \usepackage{
   hyperref,
@@ -45,30 +40,23 @@ Do not distribute a modified version of this file under the same name.
 }
 \setmainlanguage{english}
 \setmainfont{TeX Gyre Pagella}
-
-% % % 
-% ATTENTION!
-% % %
-% This def has to be made because at any place this macro is called but nowhere def’d.
-% No idea what’s going on here, seems to be a gmdocc-problem
-\def\Gm@checkbool#1{}
-% % % 
-% ATTENTION!
-% % %
+\def\marginpartt{\scriptsize\ttfamily}
 
 \title{|frunge-lettrine|}
 \author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
-\date{\frletpackageversion}
-\def\marginpartt{\scriptsize\ttfamily}
+\date{\packageversion}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-This is the documentation of the package |frunge-lettrine|. It aims to offer a simple way to use beautiful, multicolored initials at the beginning of every paragraph. These initials are taken from different OpenType fonts, one of them providing the letter itself, and others providing the ornaments. Also, a thin line can be set under each line of types to simulate the old handwritings and very early printings.
+This is the documentation of the package |frunge-lettrine|. It aims to offer a simple way to use beautiful, {\color{blue}mul\color{red}ti}colored initials at the beginning of every paragraph. These initials are taken from \emph{different} OpenType fonts, one of them providing the letter itself, and others providing the ornaments. Also, a thin line can be set under each line of types to simulate the old handwritings and very early printings.
 
 Based on the frunge project, it will take some time to be really usefull. If you want to contribute to frunge, just google it and mail to the projet mailing list ;)
 \end{abstract}
 \tableofcontents
+\newpage
+\section{Prerequisites}
+As this package needs special fonts so typeset initials, you have to provide them: One \emph{main} font contains the initial itself, i.\,e. the letter. Another font contains the ornaments for the initial. Only this way multiple colors are possible. Theoretically, more than one ornament is possible, but there are no fonts so far that would provide this. If you need support for multi-ornament fonts, please contact me. I will provide a hook to implement it – if you share the fonts with me :)
 \section{Usage}
 \label{sec:usage}
 Load the package by saying
@@ -93,6 +81,7 @@ Future relaeses might be capable to handle several ornament fonts; this is not p
 \item[draft] in |draft| mode, no ornaments are printed, no thin lines, but only the big letters. Must be given explicitly (cannot be taken from documentclass |draft|!)
 \item[oldpaper] Well, this is more a kind of fun-option: As the old book we want to imitate here, are mostly quite – old. And so is their paper. With this option, the pagecolor will be set to the rgb value |0.956 0.743 0.496|. That is surely nothing really meaningful, but maybe it will be useful in future relaeses. Maybe a nice background structure could be used to imitate a smooth, old paper.
 \item[folation] The old books were not numbered by pages, but by sheets. Activating this option will imitate this behaviour.
+\item[rubricate] Not yet implemented.
 \end{description}
 
 \subsubsection{Fonts}
@@ -192,6 +181,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % Load the needed packages; lettrine for the capitals, linen for the thin line.
 % \begin{macrocode}
 \RequirePackage{
+  expl3,
   lettrine,
   lineno,
   xcolor
@@ -217,26 +207,47 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 }
 % \end{macrocode}
 % \end{macro}
+% \subsection{Rubricate}
+%Rubricate means to use red color for to emphasize something, especially headings. We don’t need that to implement here as headings are done via the document class. But sometimes also every beginning of a sentence is emphasized by rubrication. Or even every uppercase letter. Both of these variants are implemented here and can be used with the option |rubricate=sentence| or |=uppercase|. We use the \XeTeX\ |interchartok| mechanism for this. Thanks to Stefan for helping me to figure out the code!
+% \begin{macrocode}
+\ExplSyntaxOn
+\newXeTeXintercharclass\frlet@lowercase
+\newXeTeXintercharclass\frlet@uppercase
+\def\frlet@color#1{\XeTeXinterchartokenstate=0 \textcolor{red}{#1}\XeTeXinterchartokenstate=1#1}
+
+\XeTeXinterchartoks \frlet@uppercase \frlet@lowercase = {}
+\XeTeXinterchartoks 255 \frlet@uppercase = {\frlet@color}
+
+\cs_new:Npn\latin_classes:n#1{
+   \XeTeXcharclass #1 = \frlet@uppercase
+   \XeTeXcharclass \intexpr_eval:n{#1+32} = \frlet@lowercase
+}
+\prg_stepwise_function:nnnN{65}{1}{90}\latin_classes:n
+\ExplSyntaxOff
+% \end{macrocode}
 % \subsection{Capitals}
 %\begin{macro} We want to modify |\lettrine| a bit, so we define a wrapper macro. The hooks |\frlet@before| and |\frlet@after| are used to implement additional code.
 % \begin{macrocode}
 \def\frlet@capital{\frlet@c@pital}
 %%
 \def\frlet@c@pital#1#2{%
+\XeTeXinterchartokenstate=0
   \setcounter{DefaultLines}{\frlet@lines}%
-  \vspace{-\the\skip12}  %% this is baselineskip!
+  \vspace{-\baselineskip}  %% else the first line would be too low
+  \let\makeLineNumber\relax %% and activate the line again
   \frlet@before%
-  \let\thelinenumber\relax  %% needed to prevent an additional, unwanted line
   \lettrine{%
-      \iffrlet@draft\else
-        \hbox to 0cm{%
-          \frlet@ornamentfont \color{\frlet@ornamentcolor}%
-          \kern\frlet@kern@ornament%
+    \iffrlet@draft\else%
+      \hbox to 0cm{%
+        \frlet@ornamentfont \color{\frlet@ornamentcolor}%
+        \kern\frlet@kern@ornament%
+        \vbox to 0pt{\vspace*{-\baselineskip}%
           \raisebox{\frlet@raise@ornament}{#1}%
-        }%
-      \fi
-        \frlet@mainfont\color{\frlet@maincolor}#1}%
-      {}%
+	}%
+      }%
+    \fi%
+    \frlet@mainfont\color{\frlet@maincolor}#1%
+  }{}% end of lettrine
 % \end{macrocode}
 % If the |draft| option is given, no ornaments and thin lines should be printed.
 % \begin{macrocode}
@@ -245,29 +256,26 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \else
 \setlength{\unitlength}{1\baselineskip}
 \begin{picture}(0,0)%
-\multiput(0,0)(0,-1){\theDefaultLines}{\line(1,0){7.3}}%
+\multiput(0,0)(0,-1){\theDefaultLines}{\hbox to 1\linewidth{\hrulefill}X}%
 \end{picture}%
     \MakeUppercase{#2}%
-    \let\thelinenumber\frlet@line %% and activate the line again
     \setcounter{frlet@linessincepar}{0}%
   \fi%
+  \let\makeLineNumber\frlet@check@line%
   \frlet@after%
+\XeTeXinterchartokenstate=1
 }
 \def\frlet@after{}%
 \def\frlet@before{}%
 
-\def\frlet@line{
+\def\frlet@check@line{
   \ifnum \thefrlet@linessincepar < \theDefaultLines
     \stepcounter{frlet@linessincepar}
   \else
-    \color{gray}
-\setlength{\unitlength}{1\columnwidth}
-    \line(1,0){1}
-    \kern-\columnwidth\kern-1.8em
+    \frlet@line  %% set the line for the first time, then switch
+    \global\let\makeLineNumber\frlet@line
   \fi
 }
-
-
 % \end{macrocode}
 % \end{macro}
 % \begin{macrocode}
@@ -318,15 +326,15 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % \label{thinline}
 % Typesetting this fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I can call it by name …} is at the moment implemented by hacking the lineno-package and substituting the line number by the thin line.
 % \begin{macrocode}
+\def\frlet@line{%
+  \linethickness{0.01ex}%
+  \color{gray}%
+  \hbox to \columnwidth{\hrulefill}%
+}
 \iffrlet@draft\else
   \iffrlet@printthinline%
     \linenumbers
-    \linethickness{0.01ex}
-    \def\thelinenumber{
-      \color{gray}
-      \line(1,0){160}
-      \kern-\columnwidth\kern-1.8em
-    }
+    \let\makeLineNumber\frlet@line
   \fi
 \fi
 % \end{macrocode}
@@ -347,12 +355,15 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % T{his}{ is a second one trying to set three letters in upper case.}
 % \end{document}
 % \end{verbatim}
-% \section{To Do}
+% \section{\color{deepblue}To Do\,/\,\color{red}Known Bugs}
 % A short section to list all things that might be nice to implement:
 % \begin{description}
 % \def\item[#1]{\olditem[\color{deepblue}#1]\ \newline }
+% \def\bugitem[#1]{\olditem[\color{red}#1]\ \newline }
+% \item[speed] This package slows down the compilation dramatically! A document takes about three times longer than without this package. So use option |disable| if you don’t need it. If you need correct setting, use |draft|. That way it is only half as fast. So far, |draft| is not reliable at reproducing the correct typesetting. So a 1000-paged document might cause some troubles …
+% \bugitem[math] Display math is \emph{not} possible any more!
 % \item[colors] It might be nice to use three or four colors for every lettrine. So three or four ornaments must be used. Should not be a big problem to implement, but a great problem for a font designer …
-% \item[underlining] The underlining is very problematic so far. Maybe the soul package coul be used here – but would need some changes!
+% \item[key-value] A key-value interface for the |\setfrlet| should be offered instead of the stupid implementation at the moment.
 % \end{description}
 % \Finale
 % \endinput
