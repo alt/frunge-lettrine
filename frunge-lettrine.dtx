@@ -26,20 +26,23 @@ Do not distribute a modified version of this file under the same name.
 \def\packageversion{27.\,02.\,2010 v0.f.c}
 \ProvidesFile{frunge-lettrine.sty}%
   [\packageversion\ using lettrine to produce beautiful frunge-based documents]
-\documentclass{gmdocc}
+\documentclass[english]{ltxdoc}
 \usepackage{
+  babel,
   hyperref,
-  polyglossia,
+  metalogo,
+  fontspec,
   xcolor
 }
 \hypersetup{
   pdfborder= 0 0 0,
   colorlinks=true,
-  linkcolor=deepblue,
-  filecolor=blue
+  linkcolor=blue,
+  filecolor=blue,
+  urlcolor=blue
 }
-\setmainlanguage{english}
-\setmainfont{TeX Gyre Pagella}
+
+\setmainfont{Linux Libertine}
 \def\marginpartt{\scriptsize\ttfamily}
 
 \title{|frunge-lettrine|}
@@ -74,7 +77,7 @@ Future relaeses might be capable to handle several ornament fonts; this is not p
 
 \subsection{Package Options}
 \let\olditem\item
-\def\item[#1]{\olditem[\color{deepblue}#1]\ \newline }
+\def\item[#1]{\olditem[\color{blue}#1]\ \newline }
 
 \begin{description}
 \item[disable] disable “lettrination“ – just use the thin line under the letters (so far, the package does nothing at all if |disalbe| is given)
@@ -100,7 +103,7 @@ The main font and the ornament font must be given via macro, see |\setfrlet| bel
 \end{description}
 
 \subsection{Macro Commands}
-\def\item[#1]{\olditem[\color{deepblue}\textbackslash #1]\ \newline}
+\def\item[#1]{\olditem[\color{blue}\textbackslash #1]\ \newline}
 \begin{description}
 \item[setfrlet] All of the key-value type package options (like |random|, |font| …) can be changed at every place in the document by |\setfrlet|, e.\,g. |\setfrlet{lines}{4}| will cause the lettrines to take 4 instead of 2 lines at the next occurance. |\setfrlet{mainfont}{...}| will change the font used for the initials.
 \item[disablefrlet] Disable the lettrination
@@ -120,7 +123,8 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 %<*package>
 % \fi
 % First, initialization of the booleans and default values:
-% \begin{macrocode}
+%    \begin{macrocode}
+\makeatletter
 \RequirePackage{ifthen}
 \newboolean{frlet@disable}
 \newboolean{frlet@printthinline}
@@ -164,9 +168,9 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \DeclareOptionX{rubricate}{\setboolean{frlet@rubricate}{true}}
 \DeclareOptionX{oldpaper}{\setboolean{frlet@oldpaper}{true}}
 \ProcessOptionsX
-% \end{macrocode}
+%    \end{macrocode}
 % If |disable| is given, the package will define |\setfrlet|, |\setfrletbool| and |\foliationhead| to dummy macros so no error will be raised when testing. Then loading is stopped:
-% \begin{macrocode}
+%    \begin{macrocode}
 \ifthenelse{
 	\boolean{frlet@disable}}
 	{\newcommand\foliationhead[3][]{}\newcommand\setfrlet[2]{}\newcommand\setfrletbool[2]{}
@@ -177,23 +181,23 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 \setfrlet{mainfont}{\normalfont}
 \setfrlet{ornamentfont}{\itshape}
 %
-% \end{macrocode}
+%    \end{macrocode}
 % Load the needed packages; lettrine for the capitals, linen for the thin line.
-% \begin{macrocode}
+%    \begin{macrocode}
 \RequirePackage{
   expl3,
   lettrine,
   lineno,
   xcolor
 }
-% \end{macrocode}
+%    \end{macrocode}
 % \subsection{Page Layout}
 % \subsubsection{Foliation}
 % This will add the foliation. It’s not a very smart way, but the page header/footer is used for this, as it offers a very easy hook. But then the head/foot cannot be used for something else.
 % \begin{macro}{foliatefoot/head} Therefore, both macros are offered. You still can set every single element of the page/foot via the usual commands for |scrpage2|. If you \emph{really} need both inner/outer head and foot for something else but foliation … maybe you shoud re-think your page layout …
 % 
 % The first two macros are user-level wrapper for the third one.
-% \begin{macrocode}
+%    \begin{macrocode}
 \newcommand\foliationfoot[3][]{\def\frlet@foliate@pos{foot}\frlet@foliate{#2}{#3}{#1}}
 \newcommand\foliationhead[3][]{\def\frlet@foliate@pos{head}\frlet@foliate{#2}{#3}{#1}}
 % 
@@ -205,11 +209,11 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \csname le\frlet@foliate@pos\endcsname{\raisebox{#1}{\kern-#2 #3\thefrlet@sheet\textsuperscript{v}}}
   \csname ro\frlet@foliate@pos\endcsname{\raisebox{#1}{\stepcounter{frlet@sheet} #3\thefrlet@sheet\textsuperscript{r}}\kern-#2}
 }
-% \end{macrocode}
+%    \end{macrocode}
 % \end{macro}
 % \subsection{Rubricate}
 %Rubricate means to use red color for to emphasize something, especially headings. We don’t need that to implement here as headings are done via the document class. But sometimes also every beginning of a sentence is emphasized by rubrication. Or even every uppercase letter. Both of these variants are implemented here and can be used with the option |rubricate=sentence| or |=uppercase|. We use the \XeTeX\ |interchartok| mechanism for this. Thanks to Stefan for helping me to figure out the code!
-% \begin{macrocode}
+%    \begin{macrocode}
 \ExplSyntaxOn
 \newXeTeXintercharclass\frlet@lowercase
 \newXeTeXintercharclass\frlet@uppercase
@@ -224,10 +228,10 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 }
 \prg_stepwise_function:nnnN{65}{1}{90}\latin_classes:n
 \ExplSyntaxOff
-% \end{macrocode}
+%    \end{macrocode}
 % \subsection{Capitals}
 %\begin{macro} We want to modify |\lettrine| a bit, so we define a wrapper macro. The hooks |\frlet@before| and |\frlet@after| are used to implement additional code.
-% \begin{macrocode}
+%    \begin{macrocode}
 \def\frlet@capital{\frlet@c@pital}
 %%
 \def\frlet@c@pital#1#2{%
@@ -248,9 +252,9 @@ This package would be useless without the wonderfull lettrine package by Daniel 
     \fi%
     \frlet@mainfont\color{\frlet@maincolor}#1%
   }{}% end of lettrine
-% \end{macrocode}
+%    \end{macrocode}
 % If the |draft| option is given, no ornaments and thin lines should be printed.
-% \begin{macrocode}
+%    \begin{macrocode}
   \iffrlet@draft
     #2\unskip
   \else
@@ -276,22 +280,22 @@ This package would be useless without the wonderfull lettrine package by Daniel 
     \global\let\makeLineNumber\frlet@line
   \fi
 }
-% \end{macrocode}
+%    \end{macrocode}
 % \end{macro}
-% \begin{macrocode}
+%    \begin{macrocode}
 \newcommand{\raiseornament}[1]{\def\frlet@raise@ornament{#1}}
 \newcommand{\kernbeforelettrine}[1]{}
 \newcommand{\kernafterlettrine}[1]{}
 \newcommand{\kernornament}[1]{\def\frlet@kern@ornament{#1}}
-% \end{macrocode}
+%    \end{macrocode}
 % This wrapper should be used at every paragraph. As |lettrine| internally works with paragraphs, too, the |\everypar| macro is used to alternate itself at every occurance.\footnote{Paul, you are a genius!} This must be set at begin document:
-% \begin{macrocode}
+%    \begin{macrocode}
 \AtBeginDocument{%
   \def\neweverypar{\everypar={\everypar={\neweverypar\frlet@capital}}}%
   \everypar={\neweverypar\frlet@capital}%
-% \end{macrocode}
+%    \end{macrocode}
 % As the |\section| macro uses |\everypar| as well, it needs to be redefined to not crash every time:
-% \begin{macrocode}
+%    \begin{macrocode}
   \let\@Startsection\@startsection
   \def\@startsection{%
   \everypar{}%
@@ -301,31 +305,31 @@ This package would be useless without the wonderfull lettrine package by Daniel 
   \@Xsect{#1}%
   \everypar\expandafter{\the\everypar\neweverypar\frlet@capital}%
   \ignorespaces}%
-% \end{macrocode}
+%    \end{macrocode}
 % Mathmode would kill the document as it uses paragraphs as well. So frlet must be escaped which is done bye the following code. This might cause problems as the definition of |\[| might change inside the document. If this happens to you, please contact me!
 % 
 % Usage of \TeX s |$$| is not possible. If you need it, you manually have to |\disablefrlet|.
-% \begin{macrocode}
+%    \begin{macrocode}
   \let\oldmathbegin\[
   \def\[{\disablefrlet\oldmathbegin}
   \let\oldmathend\]
   \def\]{\oldmathend\enablefrlet}
-% \end{macrocode}
+%    \end{macrocode}
 % The imitation of old paper will be activated at begin document, too:
-% \begin{macrocode}
+%    \begin{macrocode}
   \ifthenelse{\boolean{frlet@oldpaper}}{\pagecolor[rgb]{0.956 0.743 0.496}}{}
 }
-% \end{macrocode}
+%    \end{macrocode}
 % The lettrines should be able to be disabled and enabled in the document. The following user-level macros do so. But they might do strange things, so be careful!
 % \label{sec:disableenable}
-% \begin{macrocode}
+%    \begin{macrocode}
 \def\disablefrlet{\def\frlet@capital{}}
 \def\enablefrlet{\def\frlet@capital{\frlet@c@pital}\everypar\expandafter{\the\everypar\neweverypar\frlet@capital}}
-% \end{macrocode}
+%    \end{macrocode}
 % \subsection{Thin Line}
 % \label{thinline}
 % Typesetting this fine, thin line\footnote{If anybody knows how this is called, \emph{please} tell me so I can call it by name …} is at the moment implemented by hacking the lineno-package and substituting the line number by the thin line.
-% \begin{macrocode}
+%    \begin{macrocode}
 \def\frlet@line{%
   \linethickness{0.01ex}%
   \color{gray}%
@@ -337,7 +341,7 @@ This package would be useless without the wonderfull lettrine package by Daniel 
     \let\makeLineNumber\frlet@line
   \fi
 \fi
-% \end{macrocode}
+%    \end{macrocode}
 % \section{Example}
 % A short example how to use this package in real life:
 % \begin{verbatim}
@@ -355,10 +359,10 @@ This package would be useless without the wonderfull lettrine package by Daniel 
 % T{his}{ is a second one trying to set three letters in upper case.}
 % \end{document}
 % \end{verbatim}
-% \section{\color{deepblue}To Do\,/\,\color{red}Known Bugs}
+% \section{\color{blue}To Do\,/\,\color{red}Known Bugs}
 % A short section to list all things that might be nice to implement:
 % \begin{description}
-% \def\item[#1]{\olditem[\color{deepblue}#1]\ \newline }
+% \def\item[#1]{\olditem[\color{blue}#1]\ \newline }
 % \def\bugitem[#1]{\olditem[\color{red}#1]\ \newline }
 % \item[speed] This package slows down the compilation dramatically! A document takes about three times longer than without this package. So use option |disable| if you don’t need it. If you need correct setting, use |draft|. That way it is only half as fast. So far, |draft| is not reliable at reproducing the correct typesetting. So a 1000-paged document might cause some troubles …
 % \bugitem[math] Display math is \emph{not} possible any more!
